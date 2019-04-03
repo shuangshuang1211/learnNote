@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>14 forms</title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="./js/forms.js"></script>
+
+</head>
+<body>
+    <div>
+        <form id="myForm" method="post" action="javascript:alert('表单已提交')" >
+            <ul>
+                <li><input type="radio" name="form1" value="red">red</li>
+                <li><input type="radio" name="form1" value="green">green</li>
+                <li><input type="radio" name="form1" value="black">black</li>
+            </ul>
+            <textarea rows="5" cols="5" id="textadd" name="text1" >默认值</textarea>
+            <input type="button" name="submit_btn" value="提交"  >
+        </form>
+    </div>
+
+    <div contenteditable> 
+        <form id="myText" method="post" action="javascript:alert('表单已提交')" >
+            <input type="text" name="number" id="textNumber" />
+            <input type="submit" id="submit_btn2" />
+        </form>
+    </div>
+        <form id="myMax" method="post" action="javascript:alert('表单已提交')" >
+            <input type="text" name="number1" id="textNumber1" size="3" maxlength="3" />
+            <input type="text" name="number2" id="textNumber2" size="3" maxlength="3" />
+            <input type="text" name="number3" id="textNumber2" size="3" maxlength="3" />
+            <input type="submit" id="submit_btn3" />
+        </form>
+    <div>
+        
+    </div>
+
+</body>
+    <script type="text/javascript">
+       formsSubmit();
+       setRules();
+       setAutofocus()
+    </script>
+</html>
