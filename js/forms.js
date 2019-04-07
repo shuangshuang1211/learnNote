@@ -103,7 +103,7 @@ function setAutofocus(){
                     if(form.elements[i+1]){      //当表单元素与target目标相等且下个表单元素存在时，就把焦点赋值给下一个表单元素。
                         form.elements[i+1].focus();
                     }
-//                    return;                  //要有返回值；
+                   return;                  //要有返回值；
                 }
             }
         }
@@ -112,7 +112,7 @@ function setAutofocus(){
     var textbox1 = document.forms[2].elements[0];
     var textbox2 = document.forms[2].elements[1];
     var textbox3 = document.forms[2].elements[2];
-    EventUtil.addHandler(textbox1,"keyup", tabNext);
+    EventUtil.addHandler(textbox1,"keyup", tabNext);   //注意此时调用方法函数时，不能用tabNext(event)，而用函数名；
     EventUtil.addHandler(textbox2,"keyup", tabNext);
     EventUtil.addHandler(textbox3,"keyup", tabNext);
 }
