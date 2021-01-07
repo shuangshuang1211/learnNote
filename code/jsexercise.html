@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document 1</title>
+
+</head>
+<body>
+ <div>
+    <form action="" method="POST">
+     你爱好的运动是？
+        <input type="checkbox" id="allinnot"/>全选/全不选
+        <br />
+        <input type="checkbox" id="football" name="item" value="足球">足球
+        <input type="checkbox" id="basketball" name="item" value="篮球">篮球
+        <input type="checkbox" id="yumao" name="item" value="羽毛球">羽毛球
+        <input type="checkbox" id="bingpang" name="item" value="兵乓球">兵乓球
+        <br />
+        <input type="button" id="checkedAllin" value="全选" onclick="seclectCheckbox()">
+        <input type="button" id="checkedAllnot" value="全不选" onclick="seclectChecksllnot()">
+        <input type="button" id="checkedReverse" value="反选" onclick="reverse()">
+        <input type="button" id="sendBtn" value="提交" onclick="send()">
+     </form>
+     
+ </div>   
+</body>
+<script src="js/jsexercise.js"></script>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>myexp实验</title>
+    </head>
+    <body>
+        <div>
+        <input type="text" id="inputnumber" placeholder="请输入需计算的数字">
+        <button type="button" onclick="computeFactorial()">计算</button>
+        <p id="numberstring">结果：<input type="text" id="output"></p>
+        <p>此数阶乘尾部的零：<input type="text" id="output_zeros"></p>
+        </div>
+        <div>
+        <p>n:<input type="text" id="inputn" placeholder="请输入数字n"></p>
+        <p>k:<input type="text" id="inputk" placeholder="请输入数字k"></p>
+        <button type="button" onclick="computeNumk()">查看数字中有几个k</button>
+        <p >结果：<input type="text" id="output_k"></p>
+        </div>
+        <div>
+        <p>n:<input type="text" id="inputarray" placeholder="请输入数字n"></p>
+        <button type="button" onclick="merger()">对输入数组降序排列</button>        
+        <p >结果：<input type="text" id="output_sort"></p>
+        </div>
+    </body>
+    <script type="text/javascript" src=./js/compute.js></script>
+    <script type="text/javascript" src=./js/sort.js></script>
+    <script type="text/javascript" src=./js/mergersort.js></script>
+</html>
