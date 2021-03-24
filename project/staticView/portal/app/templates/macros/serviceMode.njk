@@ -1,0 +1,23 @@
+{% macro renderSubContent(serviceTables) %}
+  <!-- Content -->
+  <div class="col-md-9 mb-5 row justify-content-between">
+    <div class="col-md-12 mb-5 row justify-content-between" id="serviceModeContent">
+      <h3 class="col-md-12 sub-content-title" id="subContentTitle">服务模式</h3>
+      <p class="col-md-12 p-line-height p-margin p-text-justify" id="serviceModeP1Content">
+        &emsp;&emsp;为了满足全校师生复杂多样的个性化计算需求，适应新型计算模式如人工智能训练等对运行环境的复杂要求，
+        高性能计算平台的建设除了在硬件设备的选型上充分考虑了计算的多样性，提供了包含CPU节点、GPU节点的丰富算力组合，
+        在软件平台的建设上也采用了区别于传统超算中心的作业调度系统的解决方案，在不损失计算性能的前提下以灵活多样的方式提供服务。
+      </p>
+      {% import 'macros/table.njk' as table %}
+      <p class="p-margin p-text-justify" id="serviceModeP2Content">{{table.renderTable(serviceTables)}}</p>
+      <p class="col-md-12 p-line-height p-margin p-text-justify" id="serviceModeP3Content">
+        &emsp;&emsp;如上表所示，计算云主要支持三种模式：
+        <br />&emsp;&emsp;对于计算资源使用量较大、有一定Linux命令行基础的用户，可以考虑使用公共集群或者独占集群模式。
+        这两种模式都使用作业调度系统提交作业。不同在于公共集群按作业运行时长来计费，独占集群的计费从申请资源开始到资源释放，如果中间并未运行作业，依然计费。
+        <br />&emsp;&emsp;如果对Linux命令行不熟悉，我们提供了私有实例模式，可以在“申请资源”处申请有交互界面的计算资源，提供了Jupyter等有交互界面的工具，上手简单，无需学习Linux，
+        适用于无计算机背景的新用户。此模式优点是学习成本低，缺点是计费方式粒度粗，不适合有大量计算任务的用户。用户也可以前期使用这类交互界面实例，如发现计算量较大，
+        建议逐渐迁移到公共集群模式上，该模式计费更准确。
+      </p>
+    </div>
+  </div>
+{% endmacro %}
