@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style type="text/css">
+    div.father{
+      /* display: table; */
+      /* justify-content: center; */
+      /* align-items: center; */
+      /* justify-content: space-between; */
+      /* position: relative; */
+      /* height: 100vh; */
+      /* padding-left: 200px;
+      padding-right: 300px */
+      border: 2px solid red;
+      /* height: 100px */
+    }
+    .left{
+      width: 200px;
+      height: 200px;
+      /* position: relative; */
+      /* left: 0px;
+      top: 3px; */
+      /* flex: 0 1 100px; */
+      background-color: blue;
+      /* float: left; */
+    }
+    .middle {
+      /* flex-grow: 1; */
+      /* display: inline-flex; */
+      height: 300px;
+      background-color: green;
+      width: 300px;
+      margin: 8px;
+      /* position: relative;
+      top: 50%; */
+      /* line-height: 100vh; */
+      /* display: table-cell; */
+      /* vertical-align: middle; */
+      /* position: absolute;
+      top: 50%;
+      transform: translateY(-50%); */
+      /* margin: 0 auto; */
+      /* position: absolute;
+      left: 200px;
+      right: 300px; */
+      /* left: -200px;
+      margin-left: -100%;
+      float: left;
+      min-width: 200px; */
+      /* margin-left: 200px;
+	    margin-right: 300px; */
+    }
+    .right{
+      width: 300px;
+      height: 300px;
+      /* position: relative;
+      right: -500px;
+      margin-left: -500px; */
+      /* float: right; */
+      /* flex: 0 1 100px; */
+      background-color: burlywood;
+    }
+    .middle a {
+      color: red;
+      margin: 8px;
+      width: 10px; /* 不起作用 */
+      border: 2px dotted goldenrod;
+    }
+  </style>
+</head>
+<body>
+  <div class="father">
+    <div class="left"></div>
+    <div class="middle">
+      <a>Link1Link1Link1Link1</a>
+      <a>Link2</a>
+    </div>
+    <div class="right"></div>
+  </div>
+</body>
+<script>
+  const getUrl = (url) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
+      xhr.onreadystatechange = () => {
+        if (this.readystate !== 4) {
+          return ;
+        } else {
+          if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+            resolve(xhr.responseText);
+          } else {
+            reject(xhr.statusText);
+          }
+        }
+      }
+      xhr.responseType = "json";
+      xhr.setRequestHeader('Accept', 'application/json');
+      xhr.send();
+    });
+  };
+  const url = encodeURIComponent('Users');
+  // getUrl(`http: //Users/test/learn/myGitHub/learnJS/note/question/data.json`).then((value) => {
+  //   console.log('success', value);
+  // }, (error) => {
+  //   console.log('failed', error);
+  // });
+</script>
+</html>
