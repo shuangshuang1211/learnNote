@@ -7,8 +7,10 @@
 2. 居中，浮动，
 3. 三栏布局:左右定宽，中间撑满剩余宽度
 4. 有哪些动画的实现机制
-5. 前端优化+缓存+渲染优化
-6. CSS 读取规则？
+   js + setInterval \ CSS3 animation + @keyframes \ transition + transform \
+   canvas(fillRect) + setInterval \ SVG和animation标签 \ 浏览器接(requestAnimationFrame)
+5. 前端优化+缓存+渲染优化 (https://segmentfault.com/a/1190000022205291)
+6. CSS 读取规则？ 从选择器的右边到左边依次读取
 7. 设定样式 几种方式 (元素名、.class 、#id、伪类)
    li em => li元素的所有em后代元素；
    ul > li => ul直系后代元素第一层后代(初代子元素)
@@ -19,5 +21,18 @@
    article p::first-line => article后代p中第一行的元素
    p ~ span => p元素之后的span元素，p和span是兄弟关系
    a[href="https://example.com"]  标签属性选择器
+   *  jss-nested： &表示选择根样式，$选择自定义的一个样式类名
 8. CSS优先级？ 级联 类 > 元素  内联样式 > ID 选择器 > 类选择器\属性选择器\伪类 > 元素选择器
-9. 单位 em: 应用在font-size中是父元素字体大小，应用在其他属性中是自身字体大小
+9. css中有哪些单位？ rem px % vh vw等单位 em: 应用在font-size中是父元素字体大小，应用在其他属性中是自身字体大小
+10. 伪元素和伪类的区别？有哪些？
+   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Pseudo-elements
+11. link和@import的区别？加载顺序，一些加载设置等
+    https://segmentfault.com/a/1190000015950516
+12. 前面两个元素不知道宽度(可以换行显示)，最后一个元素占据剩余宽度？
+    flex布局实现，父： flex， flex-wrap: wrap; 子(lastchild): flex-grow: 1
+    file:///Users/test/learn/myGitHub/learnJS/note/question/jsLoadedOrder/page.html
+13. 什么是盒模型？理解
+    css在布局分配的空间时，一般把元素分为块元素和内联元素，
+    阐明块元素和内联元素的区别，会根据 contentBox(width,height) + padding + border + margin
+
+    box-sizing: border-box

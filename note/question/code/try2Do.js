@@ -371,66 +371,6 @@ const getUrl = (url) => {
 //   console.log('failed', error);
 // });
 
-const allPromise = (arrPromises) => {
-  let res = [];
-  return new Promise((resolve, reject) => {
-    let promises = arrPromises
-    if (!(arrPromises instanceof Array)) {
-      promises = [...arguments];
-    }
-    promises.forEach((promise, index) => {
-      if (promise instanceof Promise) {
-        promise.then((value) => {
-          res.push(value);
-          if (res.length === promises.length) {
-            return resolve(res);
-          }
-        }, reject);
-      } else {
-        res.push(promise);
-      }
-    });
-  })
-};
-const racePromise = (arrPromises) => {
-  let res = [];
-  return new Promise((resolve, reject) => {
-    let promises = arrPromises
-    if (!(arrPromises instanceof Array)) {
-      promises = [...arguments];
-    }
-    promises.forEach((promise, index) => {
-      if (promise instanceof Promise) {
-        promise.then((value) => {
-          res.push(value);
-          if (res.length === 1) {
-            return resolve(res);
-          }
-        }, reject);
-      } else {
-        res.push(promise);
-      }
-    });
-  })
-};
-// const a = new Promise(function (resolve, reject) {
-
-//   setTimeout(() => {resolve('a resolve');}, 200);
-// });
-// const b = new Promise(function (resolve, reject) {
-//   setTimeout(() => {reject('b resolve');}, 100);
-// });
-// const c = new Promise(function (resolve, reject) {
-//   setTimeout(() => {resolve('c resolve');}, 300);
-// });
-
-// Promise.all([a, b, c]).then((vale) => console.log('Promise.all', vale), (err) => {console.log('Promise.all_reject', err)});
-// allPromise([a, b, c]).then((vale) => console.log('allPromise', vale), (err) => {console.log('allPromise_reject', err)});
-
-// Promise.race([a, b, c]).then((vale) => console.log('Promise.race', vale), (err) => {console.log('Promise.race_reject', err)});
-// racePromise([a, b, c]).then((vale) => console.log('racePromise', vale), (err) => {console.log('racePromise_reject', err)});
-// Promise.allSettled([a, b, c]).then((vale) => console.log('Promise.allSellted', vale), (err) => {console.log('Promise.Sellted_reject', err)});
-// Promise.any([a, b, c]).then((vale) => console.log('Promise.any', vale), (err) => {console.log('Promise.any_reject', err)});
  // 二叉树遍历求和
  //       1
  //     2   3
@@ -558,22 +498,25 @@ function removeDuplicate (arr) {
 // console.log('removeDuplicate', removeDuplicate(dupArr), [...new Set(dupArr)]);
 
 function* test (x) {
-  console.log('satrt');
+  console.log('satrt', x);
+  // console.log(' yield x*2', yield x*2);
   const y = yield x*2;
+  console.log('y', y);
   const z = yield y*3;
+  console.log('z', z);
   return z;
 }
 
 const gen = test(2);
-// console.log('[...gen]', [...gen]);
-// const res1 = gen.next();
-// const res2 = gen.next(res1.value);
-// const res3 = gen.next(res2.value);
-// const res4 = gen.next(res3.value);
-// console.log(res1);
-// console.log(res2);
-// console.log(res3);
-// console.log(res4);
+// // console.log('[...gen]', [...gen]);
+const res1 = gen.next(3);
+const res2 = gen.next(7);
+const res3 = gen.next(5);
+const res4 = gen.next(6);
+console.log(res1);
+console.log(res2);
+console.log(res3);
+console.log(res4);
 function runGen (gen, arr = []) {
   let res;
   if (arr.length > 0) {
@@ -595,6 +538,14 @@ function runGen (gen, arr = []) {
 //   yield 'world';
 //   return 'ending';
 // }
+function* nTimes(n) {
+  if (n > 0) {
+    yield* nTimes(n - 1);
+    yield n - 1;
+} }
+for (let n of nTimes(10)) {
+  console.log('n', n)
+}
 
 // var hw = helloWorldGenerator();
 // hw.next();
@@ -615,9 +566,56 @@ Person.prototype.sayName = function(){
     console.log('this', this, this.name);
 };
 
-const persons1 = new Person('own1');
-console.log('persons1', persons1);
-const persons2 = new Person('own2');
-console.log('persons2', persons2);
-persons1.sayName();
-persons2.sayName();
+// const persons1 = new Person('own1');
+// console.log('persons1', persons1);
+// const persons2 = new Person('own2');
+// console.log('persons2', persons2);
+// persons1.sayName();
+// persons2.sayName();
+
+function toNonExponential(num) {
+  var m = num.toExponential().match(/\d(?:\.(\d*))?e([+-]\d+)/);
+  console.log('m', m, 'num', num, 'Math.max', Math.max(0, (m[1] || '').length - m[2]));
+  return num.toFixed(Math.max(0, (m[1] || '').length - m[2]));
+}
+// console.log('9e-7', toNonExponential(9e-7), '0.7', toNonExponential(11.7));
+// for (var i = 0; i < 3; i ++) {
+//   setTimeout(() => {
+//     console.log('i', i);
+//   }, 100);
+// }
+
+class CIterator {
+  constructor (limits) {
+    this.limits = limits;
+  }
+  [Symbol.iterator] () {
+    let limits = this.limits;
+    let count = 1;
+    return {
+      next() {
+        if (count <= limits) {
+          return {done: false, value: count++};
+        } else {
+          return {done: true, value: undefined};
+        }
+      }
+    }
+  }
+}
+
+const count = new CIterator(4);
+
+function* generatorFn(x) {
+  console.log('gen2', 1);
+  yield x;
+  console.log('gen2', 2);
+  yield x*2;
+  console.log('gen2', 3);
+  yield x*3;
+  console.log('gen2', 'return');
+  return 'res';
+}
+const gen2 = generatorFn(2);
+// console.log('gen2', gen2, 'gen2.next();', gen2.next());
+// gen2.next();

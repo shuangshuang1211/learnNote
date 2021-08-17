@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Animation</title>
+  <style type="text/css">
+    .one .shape {
+      animation: one 5s infinite ease-out;
+    }
+
+.one .surface {
+  background: #000;
+  height: 10em;
+  width: 1em;
+  position: absolute;
+  top: calc(50% - 4em);
+  left: calc(50% + 10em);
+}
+
+@keyframes one {
+  from {
+    opacity: 0;
+  }
+  40%, 50% {
+    transform: translateX(8em);
+    height: 6em;
+    width: 2em;
+    top: calc(50% - 3em);
+    animation-timing-function: linear;
+    opacity: 1;
+  }
+  to {
+    width: 4em;
+    height: 4em;
+    top: calc(50% - 2em);
+    left: calc(50% - 2em);
+    opacity: 1;
+    animation-timing-function: cubic-bezier(1,-1.92,.95,.89);
+  }
+  /* 0%, 15% {
+    opacity: 0;
+  } */
+  /* 15%, 25% {
+    transform: none;
+    animation-timing-function: cubic-bezier(1,-1.92,.95,.89);
+    width: 4em;
+    height: 4em;
+    top: calc(50% - 2em);
+    left: calc(50% - 2em);
+    opacity: 1;
+  }
+  35%, 45% {
+    transform: translateX(8em);
+    height: 6em;
+    width: 2em;
+    top: calc(50% - 3em);
+    animation-timing-function: linear;
+    opacity: 1;
+  }
+  70%, 100% {
+    transform: translateX(8em) translateY(5em);
+    height: 6em;
+    width: 2em;
+    top: calc(50% - 3em);
+    opacity: 0;
+  } */
+}
+body {
+  margin: 0;
+  background: #e9b59f;
+  font-family: HelveticaNeue, Arial, Sans-serif;
+  color: #fff;
+}
+
+.principle {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+}
+
+.shape {
+  background: #2d97db;
+  border: 1em solid #fff;
+  width: 4em;
+  height: 4em;
+  position: absolute;
+  top: calc(50% - 2em);
+  left: calc(50% - 2em);
+}
+  </style>
+</head>
+<body>
+  <div class="father">
+    <article class="principle one">
+      <div class="shape"></div>
+      <div class="surface"></div>
+    </article>
+  </div>
+</body>
+<script>
+</script>
+</html>

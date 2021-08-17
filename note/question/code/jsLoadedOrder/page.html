@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
+  <script src="./js/a.js" ></script>
+  <script src="./js/b.js" async></script>
+  <script src="./js/c.js" ></script>
   <style type="text/css">
     div.father{
       /* display: table; */
@@ -16,16 +19,21 @@
       /* padding-left: 200px;
       padding-right: 300px */
       border: 2px solid red;
+      display: flex;
+      /* width: 600px; */
+      /* flex-wrap: wrap; */
       /* height: 100px */
     }
     .left{
-      width: 200px;
+      /* width: 300px; */
       height: 200px;
+      flex-grow: 2;
       /* position: relative; */
       /* left: 0px;
       top: 3px; */
       /* flex: 0 1 100px; */
       background-color: blue;
+      /* flex-basis: 400px */
       /* float: left; */
     }
     .middle {
@@ -35,6 +43,7 @@
       background-color: green;
       width: 300px;
       margin: 8px;
+      /* flex-grow: 2; */
       /* position: relative;
       top: 50%; */
       /* line-height: 100vh; */
@@ -55,7 +64,8 @@
 	    margin-right: 300px; */
     }
     .right{
-      width: 300px;
+      flex-grow: 1;
+      /* width: 300px; */
       height: 300px;
       /* position: relative;
       right: -500px;
@@ -70,12 +80,21 @@
       width: 10px; /* 不起作用 */
       border: 2px dotted goldenrod;
     }
+    .leftchildren {
+      width: 400px;
+    }
   </style>
 </head>
 <body>
   <div class="father">
-    <div class="left"></div>
+    <script>
+      console.log('body内的script');
+    </script>
+    <div class="left">
+      <div class="leftchildren">left_Div</div>
+    </div>
     <div class="middle">
+      <a>Link1Link1Link1Link1</a>
       <a>Link1Link1Link1Link1</a>
       <a>Link2</a>
     </div>
@@ -83,27 +102,35 @@
   </div>
 </body>
 <script>
-  const getUrl = (url) => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', url);
-      xhr.onreadystatechange = () => {
-        if (this.readystate !== 4) {
-          return ;
-        } else {
-          if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
-            resolve(xhr.responseText);
-          } else {
-            reject(xhr.statusText);
-          }
-        }
-      }
-      xhr.responseType = "json";
-      xhr.setRequestHeader('Accept', 'application/json');
-      xhr.send();
-    });
-  };
-  const url = encodeURIComponent('Users');
+  console.log('body后的script');
+  document.addEventListener('DOMContentLoaded',function(){
+    console.log('DOMContentLoaded');
+  });
+  window.addEventListener('load', (event) => {
+    console.log('load_page is fully loaded');
+  });
+
+  // const getUrl = (url) => {
+  //   return new Promise((resolve, reject) => {
+  //     const xhr = new XMLHttpRequest();
+  //     xhr.open('GET', url);
+  //     xhr.onreadystatechange = () => {
+  //       if (this.readystate !== 4) {
+  //         return ;
+  //       } else {
+  //         if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+  //           resolve(xhr.responseText);
+  //         } else {
+  //           reject(xhr.statusText);
+  //         }
+  //       }
+  //     }
+  //     xhr.responseType = "json";
+  //     xhr.setRequestHeader('Accept', 'application/json');
+  //     xhr.send();
+  //   });
+  // };
+  // const url = encodeURIComponent('Users');
   // getUrl(`http: //Users/test/learn/myGitHub/learnJS/note/question/data.json`).then((value) => {
   //   console.log('success', value);
   // }, (error) => {
