@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Test执行顺序</title>
+  <style type="text/css">
+    div.father{
+      border: 2px solid red;
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+  <div class="father">
+  </div>
+</body>
+<script>
+  console.log('getName1', getName.toString());
+  function Foo() {
+    // 没有var的变量会提升到全局作用域，所以执行Foo()后全局作用域的getName 变成 这个
+    getName = function () {
+      console.log(1);
+    }
+    console.log('this', this);
+    return this;
+ }
+ Foo.getName = function () {
+  console.log(2);
+}
+Foo.prototype.getName = function () {
+  console.log(3);
+ }
+
+ // 函数声明提升优于变量声明提升
+ var getName = function(){
+  console.log(4);
+ }
+
+ function getName() {
+  console.log(5);
+  }
+
+  console.log('getName2', getName.toString());
+
+  Foo.getName(); //2
+  Foo().getName(); //  1
+  console.log('getName3', getName.toString());
+  getName();  // 1
+  // 运算符执行的优先级，函数调用、new 参数列表 > new 无参数列表
+  new Foo.getName(); //2 先执行Foo.getName() 后 new ... ,所以实际 上是 new function () {console.log(2);} 这里实际上返回的是一个 {}
+  const foo = new Foo();
+  console.log('foo', foo);
+  new Foo().getName();  // new Foo（）和getName（） 优先级一样，会从左到右的执行，所以先new Foo(), 得到Foo的{}实例，{} 的实例上无getName方法，所以会调用原型链上的getName() ?
+  const newFoo = new new Foo().getName();
+  console.log('newFoo', newFoo);
+  new new Foo().getName();  // 考察的是运算符执行的顺序？
+  const isbefore = 1 > 0 || 3 && 1 < 0;
+  console.log('isbefore', isbefore);
+</script>
+</html>

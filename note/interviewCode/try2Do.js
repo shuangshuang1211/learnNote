@@ -248,36 +248,59 @@ function radixSort (arr, maxDigit) {
 
 // console.log('radix', radixSort([4,5,1,6, 2,1,7,3], 1));
 
-function debounce (fn, delay) {
+// 多次触发，只会第一次或最后一次间隔delay毫秒后执行
+function debounce (fn, delay, intermidate) {
+  if (typeof fn === 'function') throw Error("fn must be function");
+  if (typeof delay === 'undefined') delay = 300;
+  if (typeof delay === 'boolean') {
+    intermidate = delay;
+    delay = 300;
+  }
+  if (typeof intermidate !== 'boolean') intermidate = false;
   let timer;
-  return () => {
-    const context = this;
-    console.log('this', this.toString());
-    const args = arguments;
+  return function (...args) {
+    const context = this;  //取debounce执行作用域的this，
+    if (intermidate && !timer) {
+      // intermidate 为true时，立即执行；但是也要保证delay
+      // 时间内不会再次执行，所以通过timer是否存在来一起判断是否是第一次执行
+      fn.apply(context, args);
+    }
     clearTimeout(timer);
     timer = setTimeout(() => {
-      fn.apply(context, args);
+      // 若第一次执行后，则timeOut内就不会执行
+      !intermidate ? fn.apply(context, args) : null;
+      // 确保delay时间后，会重新判断执行条件，需清空timer值
+      timer = null;
     }, delay);
   }
 }
 
-function throttle (fn, delay = 250) {
+function throttle (fn, delay) {
+  if (typeof fn === 'function') throw Error("fn must be function");
+  if (typeof delay === 'undefined') delay = 300;
   let timer;
-  let lastTime;
+  let lastTime = 0; // 记录上一次执行的时间毫秒数
   return function () {
-    let nowTime = Number(new Date());
+    let nowTime = Date.now();
     const args = arguments;
-    const context = this;  // 取debounce执行作用域的this
-    // console.log('this', this.toString());
-    if (lastTime && nowTime < lastTime + delay) {
-      clearTimeout(timer);
+    const context = this;  // 调用函数时的对象
+    // lastTime + delay > now 说明是高斌触发；即上一次调用还未到需等待的时间time，需要再等待 time - (now - prevTime)执行
+    // lastTime + delay <= now 说明上一次调用离现在刚好超过或等于等待时间，需要再一次调用
+    const interval = delay - (nowTime - lastTime);
+    // 此时说明不能立即调用fn，而且如果已经存在timer的一个定时器，则也不需要再重新定义timer
+    if (interval > 0 && !timer) {
       timer = setTimeout(() => {
-        lastTime = nowTime;
         fn.apply(context, args);
-      }, delay);
+        lastTime = Date.now();
+        clearTimeout(timer);
+        timer = null;
+      }, interval);
     } else {
-      lastTime = nowTime;
+      lastTime = Date.now();
       fn.apply(context, args);
+      // 每次执行后 清空timer保证下个周期的timeOut调用能正常加入队列
+      clearTimeout(timer);
+      timer = null;
     }
   }
  }
@@ -290,16 +313,27 @@ function throttle (fn, delay = 250) {
 
 // console.log('test', debounce(fnt, 2000)());
 
-function newOperation (ctors) {
-  const args = Array.prototype.slice(arguments, 1);
+// 实现 new 关键字
+function newOperation (creator, ...rest) {
   const newObj = {};
-  newObj._proto_ = ctors.prototype;
-  const res = ctors.apply(newObj, args);
+  newObj._proto_ = creator.prototype;
+  const res = creator.apply(newObj, rest);
+  // console.log('res', res, 'newObj', newObj);
   if ((typeof res === 'object' || typeof res === 'function') && res !== null) {
     return res;
   }
   return newObj;
 }
+// 用例测试
+function Person1(name, age, job){
+  this.name = name;
+  this.age = age;
+  this.job = job;
+  this.sayName = function() {
+    console.log(this.name);
+}; }
+const person1 = newOperation(Person1, 'Nicholas', '30', 'web');
+// console.log('person1', person1);
 
 function flatArr (arr) {
   return arr.reduce((acc, cur) => {
@@ -427,8 +461,8 @@ let sumArr = [];
       }
    }
  }
- console.log('binaryTreeSum', binaryTreeSum(binaryTree));
-console.log('sumArr', sumArr);
+//  console.log('binaryTreeSum', binaryTreeSum(binaryTree));
+// console.log('sumArr', sumArr);
 
  function sumTree(root, sum = 0) {
 	// 1. 判断输入是否合法
@@ -500,7 +534,11 @@ function removeDuplicate (arr) {
 function* test (x) {
   console.log('satrt', x);
   // console.log(' yield x*2', yield x*2);
-  const y = yield x*2;
+  const fn = () => {
+    console.log('调用next后才执行');
+    // return x*2;
+  };
+  const y = yield fn();
   console.log('y', y);
   const z = yield y*3;
   console.log('z', z);
@@ -509,13 +547,13 @@ function* test (x) {
 
 const gen = test(2);
 // // console.log('[...gen]', [...gen]);
-const res1 = gen.next(3);
-const res2 = gen.next(7);
-const res3 = gen.next(5);
-const res4 = gen.next(6);
+const res1 = gen.next(3);  // 第一次调用会执行到第一个yield关键字停止，返回res1 {value: 4, done: false}
 console.log(res1);
+const res2 = gen.next(7);
 console.log(res2);
+const res3 = gen.next(5);
 console.log(res3);
+const res4 = gen.next(6);
 console.log(res4);
 function runGen (gen, arr = []) {
   let res;
@@ -543,9 +581,9 @@ function* nTimes(n) {
     yield* nTimes(n - 1);
     yield n - 1;
 } }
-for (let n of nTimes(10)) {
-  console.log('n', n)
-}
+// for (let n of nTimes(10)) {
+//   // console.log('n', n)
+// }
 
 // var hw = helloWorldGenerator();
 // hw.next();
@@ -619,3 +657,36 @@ function* generatorFn(x) {
 const gen2 = generatorFn(2);
 // console.log('gen2', gen2, 'gen2.next();', gen2.next());
 // gen2.next();
+
+// 函数参数改变
+const  a = 'a';
+const  b = 'b';
+const c = 'c';
+function ab(a, b) {
+  // 'use strict'
+  a = 'aa';
+  b = 'bb';
+  // 非严格模式下arguments会与命名参数保持一致，严格模式下给arguments[x]重新赋值无效，x只与实际调用传入的参数有关
+  console.log('arguments', arguments); //严格模式下 arguments: { '0': 'a', '1': 'b' }， 非严格模式下；就是新赋值的值
+  // console.log('this', this);
+  return a + this.c + b;  // 会用新的‘aa’ 和 ‘bb’值
+ }
+//  console.log('ab', ab.bind({c: 'newcc'})(a, b));
+
+function makeKing(name = 'Henry', numerals = 'VIII') {
+  return `King ${name} ${numerals}`;
+}
+
+function curry(fn) {
+  return function curried(...args) {
+     if (args.length < fn.length) {
+       return function (...res) {
+          return curried(...args, ...res);
+       }
+     }
+     return fn(...args);
+  }
+}
+
+const currySum = curry((a1, a2, a3) => a1 + a2 + a3);
+console.log('currySum', currySum(1)(2)(3), currySum(1, 2)(3))

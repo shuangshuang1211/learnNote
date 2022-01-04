@@ -3,17 +3,6 @@ console.log('a开始下载');
 //   console.log('a');
 // };
 
-let a = 'a';
-let b = 'b';
-const c = 'c';
-// function ab(a, b) {
-//   a = 'aa';
-//   b = 'bb';
-//   console.log('this', this);
-//   return a + this.c;
-//  }
-// //  console.log('ab', ab.bind({c: 'newcc'})(a, b));
-
 function test() {
   // if (true) {
   //   let  message = 'h';

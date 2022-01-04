@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style type="text/css">
+    div.father{
+      border: 2px solid red;
+      display: grid;
+      /* padding: 2px; */
+       /*定义每行的高度 这里就是三行 */
+      /* grid-template-rows: [row-1-start] minmax(100px, auto) [row-2-start]  100px [row-2-end] 200px; */
+       /*定义每列的宽度 这里就是三列 */
+      /* grid-template-columns: 2fr 1fr 3fr;  */
+      grid-gap: 4px;
+      /* grid-template-areas: 'header header' 'sidebar content' 'footer footer';
+      grid-template-rows: 1fr 3fr 1fr;
+      grid-template-columns: 1fr 4fr; */
+      grid-template-columns: 30px 60px;
+      /*剩余item排列方式 和占比 */
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr 2fr 3fr
+    }
+    .father > div {
+      border: 1px dotted blue;
+      background-color: crimson;
+      /* margin: 2px; */
+    }
+    .ch1{
+      /* grid-row: header;  */
+       /* 设置item在每行line线上的宽度，即所占高度， start是line起点，end是横着line线的终点*/
+      /* grid-row-end: 4; */
+      /* span 关键字是跨越几行 */
+      /* grid-column: 2 / span 4;  */
+      /* grid-area: 2/2/3/4; 是grid-row-start grid-column-start grid-row-end grid-column-end 的缩写 */
+      /* grid-column: header */
+    }
+    .ch2 {
+      /* grid-row: sidebar;
+      grid-column: sidebar; */
+    }
+    .ch3 {
+      /* grid-row: content;
+      grid-column: content; */
+    }
+    .ch4 {
+      /* grid-row: footer;
+      grid-column: footer */
+    }
+  </style>
+</head>
+<body>
+  <div class="father">
+    <div class="ch1">1</div>
+    <div class="ch2">2</div>
+    <div class="ch3">3</div>
+    <div class="ch4">4</div>
+    <div class="ch5">5</div>
+    <div class="ch6">6</div>
+    <div class="ch7">7</div>
+  </div>
+</body>
+<script>
+</script>
+</html>

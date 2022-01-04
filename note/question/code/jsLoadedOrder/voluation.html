@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Test执行顺序</title>
+  <style type="text/css">
+    div.father{
+      border: 2px solid red;
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+  <div class="father">
+  </div>
+</body>
+<script>
+  var n = 10;
+  var a = {
+    n: 1,
+    pro: {
+      getValue: () => {
+        console.log(this, this.n);
+      }
+    }
+  }
+
+  // a.pro.getValue();
+  function fn2(xx) {
+  this.x = xx;
+  return this;
+}
+var x = fn2(5);
+console.log('x1', x);
+var y = fn2(6);
+console.log('x2', x);
+console.log('y', y.x);
+</script>
+</html>

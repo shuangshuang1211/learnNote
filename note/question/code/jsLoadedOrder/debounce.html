@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
-  <script src="./js/a.js" ></script>
-  <script src="./js/b.js" async></script>
-  <script src="./js/c.js" ></script>
   <style type="text/css">
     div.father{
       /* display: table; */
@@ -20,6 +17,7 @@
       padding-right: 300px */
       border: 2px solid red;
       display: flex;
+      height: 30000px;
       /* width: 600px; */
       /* flex-wrap: wrap; */
       /* height: 100px */
@@ -87,66 +85,65 @@
 </head>
 <body>
   <div class="father">
-    <script>
-      console.log('body内的script');
-    </script>
-    <div class="left">
-      <div class="leftchildren">left_Div</div>
-    </div>
-    <div class="middle">
-      <a>Link1Link1Link1Link1</a>
-      <a>Link1Link1Link1Link1</a>
-      <a>Link2</a>
-    </div>
-    <div class="right"></div>
+    <button id="button" value="">点击</button>
   </div>
 </body>
 <script>
-  console.log('body后的script');
-  document.addEventListener('DOMContentLoaded',function(){
-    console.log('DOMContentLoaded');
-  });
-  window.addEventListener('load', (event) => {
-    console.log('load_page is fully loaded');
-  });
-  function makePower(p) {
-    return function (num) {
-      return Math.pow(num, p);
+  let i = 0;
+  function myDebounce (handleFn, time, intermidate) {
+    let timer = null;
+    return (...args) => {
+      i++;
+      console.log(`第${i}次点击`, Date.now());
+
+      const isCallFirst = intermidate && !timer;
+      isCallFirst ? handleFn(...args) : null;
+      if (timer) {
+        clearTimeout(timer);
+      }
+      console.log('timer', timer);
+      timer = setTimeout(() => {
+        timer = null;
+        !intermidate ? handleFn(...args) : null;
+      }, time);
     }
-   }
+  }
 
-  //  const makePower2 = makePower(2);
+  function myThrottle (handleFn, time) {
+    let prevCallTime = 0, timer;
+    return (...args) => {
+      i++;
+      console.log(`第${i}次点击`, Date.now());
+      // prevCallTime + time > now 说明是高斌触发；即上一次调用还未到需等待的时间time，需要再等待 time - (now - prevTime)执行
+      // prevCallTime + time <= now 说明上一次调用离现在刚好超过或等于等待时间，需要再一次调用
+      const nowTime = Date.now();
+      console.log('nowTime', nowTime, 'prevCallTime', prevCallTime, 'nowTime - prevCallTime', nowTime - prevCallTime);
+      if (prevCallTime + time > nowTime && !timer) {
+        const interval = time - (nowTime - prevCallTime);
+        console.log('interval', interval);
+        timer = setTimeout(() => {
 
-  //  const makePower3 = makePower(3);
-  //  makePower2(4);
+          handleFn(...args);
+          clearTimeout(timer);
+          timer = null;
+          prevCallTime = Date.now();
+        }, [interval]);
+      } else if (prevCallTime + time <= nowTime) {
 
-  //  console.log('makePower2', makePower2);
+        handleFn(...args);
+        clearTimeout(timer);
+        timer = null;
+        prevCallTime = Date.now();
+      }
+    }
+  }
 
-  // const getUrl = (url) => {
-  //   return new Promise((resolve, reject) => {
-  //     const xhr = new XMLHttpRequest();
-  //     xhr.open('GET', url);
-  //     xhr.onreadystatechange = () => {
-  //       if (this.readystate !== 4) {
-  //         return ;
-  //       } else {
-  //         if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
-  //           resolve(xhr.responseText);
-  //         } else {
-  //           reject(xhr.statusText);
-  //         }
-  //       }
-  //     }
-  //     xhr.responseType = "json";
-  //     xhr.setRequestHeader('Accept', 'application/json');
-  //     xhr.send();
-  //   });
-  // };
-  // const url = encodeURIComponent('Users');
-  // getUrl(`http: //Users/test/learn/myGitHub/learnJS/note/question/data.json`).then((value) => {
-  //   console.log('success', value);
-  // }, (error) => {
-  //   console.log('failed', error);
-  // });
+  const buttonNode = document.getElementById("button");
+  buttonNode.onclick = myDebounce(() => {
+    console.log(`第${i}次点击执行了`, Date.now());
+  }, 1000);
+  window.onscroll = myThrottle(() => {
+    console.log(`第${i}gundong了`, Date.now());
+  }, 600)
 </script>
 </html>
