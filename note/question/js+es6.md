@@ -48,15 +48,39 @@
         - 寄生组合继承，寄生组合继承就是借用构造函数继承属性，原型链的混成形式继续方法，不必为了指定子类型的原型而调用超类型的构造函数，一般这种模式普遍被认为是理想的模式，
     
           ```js
-          function inheritPrototype (SuperType, SubType) {
+           function inheritPrototype (SuperType, SubType) {
           	const prototype = object(SuperType.prototype);
             prototype.constructor = SubType
             SubType.prototype = prototype;
           }
           ```
     
+        - **原型的考点**
+        
+          constructor的指向，instanceOf的手动实现，原型链的尽头(Object.prototype._proto_ === null),原型链的属性屏蔽问题（原型链上有且writeable为true会重写，writeable为false则无法修改，如果是个setter，则一定会调用这个setter，不会屏蔽也不会重新定义），创建一个纯净的对象(Obejct.create(null)), 
+        
+          ```js
+          // 实现instanceof
+          function myInstanceof (instance, constructorFn) {
+            // instance 为普通类型或null则返回true
+            // constructorFn 为构造函数
+            if (typeof constructorFn !== 'function')  throw new Error('');
+            if ((typeof instance !== 'function' && typeof instance !== 'object') || null) return false;
+            // 循环查找instance的原型对象是否是constructorFn的prototype,直到instance的原型对象为null
+            let protoObj = constructorFn.prototype
+            while (instance.__proto__) {
+              if (protoObj === instance.__proto__) {
+                return true;
+              }
+              instance = instance.__proto__
+            }
+            return false;
+          }
           
-    
+          ```
+          
+          
+      
       因为es中继承各种或多或少的问题，所以再现在开发中引入TS，辅助开发。extends用于扩展父类，mixin混合多种类组成新的类
     
     - 多态：针对某个对象的方法或属性，在实际运行时可能会有不同的实现，体现了可扩展性和多样性
@@ -64,6 +88,8 @@
 - JavaScript 如何实现这些特点，比如封装、继承、多态。如果关于上述三点，你能够解释到有多少种实现方式、优缺点是什么。以及近几年流行的解决方案是什么。这就是**「加分」**，比如对于继承吧。类式继承、构造函数继承、组合继承、原型继承、寄生组合继承等等，说出大概的实现思路和优缺点，再介绍下 extends 或者 mixin 的实现甚至你可以衍生到JavaScript 的模块化发展甚至到为什么现在 TS 如此流行。那么可以说到这一环节解答的就非常棒了。
 
 - 为什么需要面向对象。以及当先对于软件设计的高内聚、低耦合的思考？
+
+  
 
 
 
@@ -85,7 +111,7 @@
 
   - JS 异步编程
 
-​     JavaScript 语言的执行环境是单线程的，一次只能执行一个任务，多任务需要排队等候，这种模式可能会阻塞代码，  导致代码执行效率低下。为了避免这个问题，出现了异步编程。一般是通过 callback 回调函数、事件发布/订阅、Promise 等来组织代码，本质都是通过回调函数来实现异步代码的存放与执行。
+​     JavaScript 语言的执行环境是单线程的(V8主线程是单线程)，一次只能执行一个任务，多任务需要排队等候，这种模式可能会阻塞代码，  导致代码执行效率低下。为了避免这个问题，出现了异步编程。一般是通过 callback 回调函数、事件发布/订阅、Promise 等来组织代码，本质都是通过回调函数来实现异步代码的存放与执行。
 
 - EventLoop 事件环和消息队列
 
@@ -95,32 +121,89 @@
 
   一开始整个脚本作为一个宏任务执行。执行过程中同步代码直接执行，宏任务等待时间到达或者成功后，将方法的回调放入宏任务队列中，微任务进入微任务队列。
 
-  当前主线程的宏任务执行完出队，检查并清空微任务队列。接着执行浏览器 UI 线程的渲染工作，检查web worker 任务，有则执行。
+  当前主线程的宏任务执行完出队，检查并清空微任务队列。接着执行浏览器 UI 线程的渲染工作（有时候是不会渲染的，hasARenderingOpportunity为false就不会渲染，requestAnimationFrame来渲染避免掉帧），检查web worker 任务，有则执行(requestIdleCallback执行时机)。
 
   然后再取出一个宏任务执行。以此循环...
 
 - 宏任务与微任务
 
-  **宏任务**可以理解为每次执行栈执行的代码就是一个宏任务（包括每次从事件队列中获取一个事件回调并放到执行栈中执行）。
+  - **宏任务**： 可以理解为每次执行栈执行的代码就是一个宏任务（包括每次从事件队列中获取一个事件回调并放到执行栈中执行）。
 
-  浏览器为了让 JS 内部宏任务 与 DOM 操作能够有序的执行，会在一个宏任务执行结束后，在下一个宏任务执行开始前，对页面进行重新渲染。
+    浏览器为了让 JS 内部宏任务 与 DOM 操作能够有序的执行，会在一个宏任务执行结束后，在下一个宏任务执行开始前，对页面进行重新渲染。
 
-  宏任务包含：script(整体代码)、setTimeout、setInterval、I/O、UI交互事件、MessageChannel 等
+    宏任务包含：script(整体代码)、setTimeout、setInterval、I/O、UI交互事件、MessageChannel 、UI rendering、requestIdleCallback、setIntermidate（node有）
+  
+     - **微任务**： 可以理解是在当前任务执行结束后需要立即执行的任务。也就是说，在当前任务后，在渲染之前，执行清空任务。 所以它的响应速度相比宏任务会更快，因为无需等待 UI 渲染。
+  
+       微任务包含：Promise.then(async await语法糖)、MutaionObserver(对DOM树进行监测)、process.nextTick(Node.js 环境)等
 
-​       **微任务**可以理解是在当前任务执行结束后需要立即执行的任务。也就是说，在当前任务后，在渲染之前，执行清空任   务。 所以它的响应速度相比宏任务会更快，因为无需等待 UI 渲染。
+**涉及浏览器渲染机制的事件模型**
 
-  微任务包含：Promise.then、MutaionObserver、process.nextTick(Node.js 环境)等
+1. 找到一个可执行的Task队列，如果没有则跳转到下面的微任务步骤
+2. 让最老的Task作为Task队列中第一个可执行的Task，并将其移除
+3. 将最老的Task作为event loop的可执行Task
+4. 记录任务开始时间点
+5. 执行Task中的setp对应的步骤(上文中Task结构中的step)
+6. 设置event loop的可执行任务为null
+7. 执行微任务检查算法
+8. 设置hasARenderingOpportunity(是否可以渲染的flag)为false
+9. 记住当前时间点
+10. 通过下面步骤记录任务持续时间
+    1. 设置顶层浏览器环境为空
+    2. 对于每个最老Task的脚本执行环境配置对象，设置当前的顶级浏览器上下文到其上
+    3. 报告消耗过长的任务，并附带开始时间，结束时间，顶级浏览器上下文和当前Task
+11. 如果在window环境下，会根据硬件条件决定是否渲染，比如刷新率，页面性能，页面是否在后台，不过渲染会定期出现，避免页面卡顿。值得注意的是，正常的刷新率为60hz，大概是每秒60帧，大约16.7ms每帧，如果当前浏览器环境不支持这个刷新率的话，会自动降为30hz，而不是丢帧。而李兰其在后台的时候，聪明的浏览器会将这个渲染时机降为每秒4帧甚至更低，事件循环也会减少(这就是为什么我们可以用setInterval来判断时候能打开其他app的判断依据的原因)。如果能渲染的话会设置hasARenderingOpportunity为true。
+
+> 除此之外，还会在触发resize、scroll、建立媒体查询、运行css动画等，也就是说浏览器几乎大部分用户操作都发生在事件循环中，更具体点是事件循环中的ui render部分。之后会进行requestAnimationFrame和IntersectionObserver的触发，再之后是ui渲染
+
+1. 如果下面条件都成立，那么执行空闲阶段算法，对于开发者来说就是调用window.requestIdleCallback方法
+   1. 在window环境下
+   2. event loop中没有活跃的Task
+   3. 微任务队列为空
+   4. hasARenderingOpportunity为false
 
 
 
 ### 闭包、函数作用域和块、作用域链
 
-- js执行会时会开辟一块内存作为执行环境，来规定执行期间允许获取到的所有信息，这些信息都被保存在变量对象中(EC),全局执行环境是最外层的执行环境
+- js执行会时会开辟一块内存作为执行环境，来规定执行期间允许获取到的所有信息(EC\ECG)，这些信息都被保存在变量对象中(VOG(window)\AO),全局执行环境是最外层的执行环境
+
 - 块级作用域：块级作用域由最近的一对包含花括号{}界定(这里涉及到**let var const**的区别)
+
 - 执行上下文：代码在执行期间所能获取到的所有变量信息
-- 函数作用域：函数在创建的时候就明确了作用域[[SCOPE]]，就是创建时所处的执行上下文
+
+- 函数作用域：函数在创建的时候就明确了作用域[[SCOPE]]，就是创建时所处的执行上下文对应的活动对象
+  - 函数调用基本会有几个步骤：确定作用域链（最左边就是自己的作用域，最右边就是ECG），确定this，初始化arguments，形参赋值(相当于在当前AO中新增一个变量)，变量提升，代码运行
+  - 模块模式：IIFE(ES5尚未支持块级作用域，使用此方法模拟块级，封装模块)，在IIFE中**绑定为函数名的标识符不能再绑定为其它值，即该标识符绑定是不可更改的**
+  
 - 作用域链：当代码在一个环境中执行时，会创建变量对象的一个作用域链，其作用是保证对当前执行环境有权访问的变量和函数进行有序访问，作用域链的前端，始终都是当前执行的代码所 在环境的变量对象，全局执行环境的变量对象始终都是作用域链中的最后一个对象
+
 - 闭包： 闭包是一种机制，当前函数执行时创建的执行的上下文不会被销毁，闭包可以保护这个私有上下文中的变量不受其他上下文的变量影响，而且当前上下文创建的数据可以被当前上下文以外的变量引用
+
+  ```js
+  // 闭包的考题
+  function fun(n, o) {
+    console.log(o);
+    return {
+      fun2: function(m) {
+        return fun(m, n);
+      }
+    }
+  }
+  // stage1
+  var a = fun(0);
+  a.fun2(1);
+  a.fun2(2);
+  a.fun2(3);
+  // stage2
+  var b = fun(0).fun2(1).fun2(2).fun2(3)
+  // stage3
+  var c = fun(0).fun2(1);
+  c.fun2(2);
+  c.fun2(3);
+  ```
+
+  
 
 ### var、let 、const
 
@@ -132,18 +215,68 @@
 
 ### this的指向问题
 
-  - 定义：this是当前函数执行的主体，即谁执行了函数，不等于执行上下文也不是当前作用域  
-  - 在标准函数中this引用的是调用这个函数时的对象，(全局上下文中就是window，o.Foo(), Foo中的this就是o，匿名函数自调用一般是window | undefined)；回调函数的this一般也是window或undefined
-  - 箭头函数中的 this 会保留定义该函数时的上下文；
-  - 事件绑定：无论是哪一级绑定事件一般都是被操作元素
-  - 构造函数调用(new)
-    - **创建一个新对象**、
+- 定义：this是当前函数执行的主体，即谁执行了函数，不等于执行上下文也不是当前作用域  
+
+- 在标准函数中this引用的是调用这个函数时的对象，(全局上下文中就是window，o.Foo(), Foo中的this就是o，匿名函数自调用一般是window | undefined)；回调函数的this一般也是window或undefined
+
+- 箭头函数中的 this 会保留定义该函数时的上下文；
+
+- 事件绑定：无论是哪一级绑定事件一般都是被操作元素
+
+- 构造函数调用(new)
+    - **创建一个新对象**
     - **新对象的[[ProtoType]] 赋值为构造函数的prototype属性(即新建的实例的属性方法是在原型对象上)**
     - **构造函数内部的 this 被赋值为这个新对象(this指向这个新对象)**
     - **执行构造函数内部代码(给新对象增加属性或方法)**
     - **构造函数有无返回(不返回或返回一个基本数据类型都相当于不返回)，**有且不为空的一个**对象**返回这个对象，否则就返回新建的新对象
       new Class(使用new 调用的是class的构造函数)
     - new Foo  (优先级19) 和 new Foo() (优先级20) 优先级不一样， new 操作符都会将函数重新执行
+    
+- **bind、apply、call、new 的自己实现、一些console题**
+
+    ```js
+    // 手动实现new
+    function myNew(constructorFn, ...rest) {
+      // 参数必须是函数
+      if (typeof constructorFn !== 'function') throw new Error('')
+      // 新建一个对象,这个对象的原型对象是传入的构造函数的原型
+      const newObj =  Object.create(constructorFn.prototype);
+      const res = constructorFn.call(newObj, ...rest)
+      return res && (typeof res === 'object' || typeof res === 'function') ? res : newObj
+    }
+    
+    //手动实现call、apply
+    Function.prototype.myCall = function(thisTarget, ...args) {
+      // 获取需改变this指向的函数本身
+      const fnBody = this;
+      const fnKey = Symbol('callFn');
+      thisTarget = thisTarget || window;
+      // 把函数添加到目标this上，作为其属性，再通过目标对象调用函数执行
+      thisTarget[fnKey] = fnBody;
+      const res = thisTarget[fnKey](...args);
+      delete thisTarget[fnKey];
+      return res;
+    }
+    
+    // 手动实现bind
+    Function.prototype.myBind = function(thisTarget, ...rest) {
+      const fnSelf = this;
+      const TempFn = function () {}
+      thisTarget = thisTarget || window;
+      const bindFn = function(...args) {
+        // 构造函数调用要考虑this指向新建的对象
+        return fnSelf.call(this instanceof fnSelf ? this : thisTarget, ...rest, ...args)
+      }
+      if (this.prototype) {
+        TempFn.prototype = this.prototype
+      }
+      bindFn.prototype = new TempFn()
+      return bindFn
+    }
+    
+    ```
+
+    
 
 ### 函数式编程、高阶函数、函数柯里化
 
@@ -170,51 +303,58 @@
   }
   ```
 
+- compose实现：对函数进行组合，传入多个函数返回一个函数
+
+  ```js
+  const compose = (...fn) => {
+    // 应为从右向左执行等
+    return (...rest) => fn.reverse().reduce((accFn, currFn) => accFn(fn(...rest)), rest)
+  }
+  ```
+
   
 
+### 设计模式
 
 
 
+### Promise 手动实现、考题
 
 
 
-1. 节流防抖实现？区别作用？
+### 节流防抖实现
 
-     
+  
 
-2. require 和import 的区别？
-    CommonJs模块输出的是一个值的拷贝，ES6模块输出的是值的引用。
-    CommonJs模块是运行时加载，ES6模块是编译时输出接口。
+1. 排序算法(至少三种)*
 
-3. 排序算法(至少三种)*
+2. 函数柯里化
 
-4. 函数柯里化
+3. 数组去重
 
-5. 数组去重
+4. Mixins 和 高阶函数 、Hook
 
-7. Mixins 和 高阶函数 、Hook
+5. sum(1) sum(1)(2)(3)(4) sum(1, 2, 3, 4);
 
-8. sum(1) sum(1)(2)(3)(4) sum(1, 2, 3, 4);
+6. node 的模块
 
-9. node 的模块
+7. 模块知识、JS怎么实现继承？
 
-10. 模块知识、JS怎么实现继承？
+8. ***宏任务、微任务、事件循环、任务队列、调用栈(Call Stack 、Execution Context)？
 
-11. ***宏任务、微任务、事件循环、任务队列、调用栈(Call Stack 、Execution Context)？
+    事件循环是执行栈和消息队列的桥梁
 
-     事件循环是执行栈和消息队列的桥梁
+    
 
-     
+9. 进程与线程？
 
-12. 进程与线程？
+    进程： 相当于打开一个应用程序(打开浏览器页面浏览器是多进程，多个页面互不干扰)
 
-     进程： 相当于打开一个应用程序(打开浏览器页面浏览器是多进程，多个页面互不干扰)
+    线程： 相当于应用程序中具体做事情的人，
 
-     线程： 相当于应用程序中具体做事情的人，
+    throw error后，后续代码不会执行，但是前面添加的异步代码会执行，死循环主线程会一直占用，所以异步的回调都不会放入主线程执行
 
-     throw error后，后续代码不会执行，但是前面添加的异步代码会执行，死循环主线程会一直占用，所以异步的回调都不会放入主线程执行
-
-13. 打开一个浏览器会有哪些进程
+10. 打开一个浏览器会有哪些进程
 
      DOM事件监听
 
@@ -226,18 +366,18 @@
 
      js引擎执行线程，主线程
 
-14. 对Symbol的理解？(是什么，属性方法，用途)
+11. 对Symbol的理解？(是什么，属性方法，用途)
           https://juejin.cn/post/6925619440843227143
          每个从Symbol()返回的symbol值都是唯一的，一个symbol值能作为对象属性的标识符 —— 这是该数据类型仅有的目的
 
-15. super方法的理解？super关键字用于访问和调用一个对象的父对象上的函数,
+12. super方法的理解？super关键字用于访问和调用一个对象的父对象上的函数,
          super 关键字使用的注意几个问题：
        只能在派生类的构造函数实例方法和静态方法中使用...
        在派生类中的构造函数中super()要在this使用之前(原因)
        如果在派生类中显式定义了构造函数，则要么必须在其中调用 super()，要么必须在其中返回 一个对象
           https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/super
 
-16. weakMap 和 Map的区别， Set和weakSet？
+13. weakMap 和 Map的区别， Set和weakSet？
          集合 与 字典 的区别：
          共同点：集合、字典 可以储存不重复的值
          不同点：集合 是以 {value, value}的形式储存元素，字典 是以 {key => value} 的形式储存
@@ -260,11 +400,11 @@
        不能遍历，方法有get、set、has、delete
          https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/6
 
-17. 数据结构?
+14. 数据结构?
           基本数据类型： string number(NaN == NaN false) symbol boolean null(null 值表示一个空对象指针) undefined bigint
           引用类型： object array set map
 
-20. 理解promise
+15. 理解promise
 
      promise 的executor函数报错时，此时promise实例的状态会是rejected，此时值是报错的原因
 
@@ -272,27 +412,27 @@
 
      then中的回调函数执行不报错范湖都是fulfilled的promise，如果返回的是promise，就是这个返回promise的状态
 
-21. Async 
+16. Async 
 
      async函数执行返回的是一个promise，如果函数体内没有报错，返回的就是fulfilled的promise值为函数返回的值，没有就是undefined
 
      - await一般配合async使用，后面放的是promsie的实例，如果不是则会转为promise的实例
      - await foo() ，此时foo函数会被立即调用，且foo的返回值可以被处理成promise值，await 后面的代码相当于then
 
-22. 函数 : 函数所有参数是按值传入的，原始值传入函数不影响外部值，对象按值传入函数(把对象作为参数传       递，那么传递的值就是这个对象的引用)，但以引用的方式来访问这个传入的对象（函数的参数就是局部变量）
+17. 函数 : 函数所有参数是按值传入的，原始值传入函数不影响外部值，对象按值传入函数(把对象作为参数传       递，那么传递的值就是这个对象的引用)，但以引用的方式来访问这个传入的对象（函数的参数就是局部变量）
        默认参数：传入undefined相当于不传会使用默认参数,后定义默认值的参数可以引用先定义的参数,前面定义的参数不能引用后面定义
        函数内部存在的对象：
        arguments : (callee指向arguments所在函数的指针)
 
     
-    
-26. Date RegExp 等创建的实例都有 toLocalString() toString() valueof() 等方法；
+
+18. Date RegExp 等创建的实例都有 toLocalString() toString() valueof() 等方法；
         原始值包装类型：
         Boolean
         Number
         String =>（slice()、substr(子字符串截取的开始位置index， 截取子字符串的长度)和 substring()）
 
-27. yield 生成器， Generator 函数赋值时不会执行函数内部内容，第一次调用的next内不需要参数，输入的参数也会忽略，随后输入的next参数是执行下一个yield相关代买需要的输入或输出,每一个yield执行完就停止，等待下一次next的调用再执行yield，执行next()后返回结果中的res.value是yield 表达式或return的返回；
+19. yield 生成器， Generator 函数赋值时不会执行函数内部内容，第一次调用的next内不需要参数，输入的参数也会忽略，随后输入的next参数是执行下一个yield相关代买需要的输入或输出,每一个yield执行完就停止，等待下一次next的调用再执行yield，执行next()后返回结果中的res.value是yield 表达式或return的返回；
         自定义生成器自动执行函数
         function runGen (gen, arr = []) {
           let res;
@@ -309,7 +449,7 @@
           }
         }
 
-28. 实现默认迭代器(生成器生成默认迭代器)
+20. 实现默认迭代器(生成器生成默认迭代器)
          class Foo {
         constructor() {
           this.values = [1, 2, 3];
@@ -319,5 +459,5 @@
         }
          }
 
-29. 有哪些设计模式？工厂模式、迭代模式、原型模式、代理模式(用途？涉及到Reflect api，四版第九章)
+21. 有哪些设计模式？工厂模式、迭代模式、原型模式、代理模式(用途？涉及到Reflect api，四版第九章)
 

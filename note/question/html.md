@@ -23,22 +23,53 @@
 
 - 若没有设置connection keepalive则会进行四次挥手断开这次tcp链接，四次挥手，由一端(比如客户端)开始发起标志位FIN = 1，seq=x的包，表示没有数据要发送了，但还是可以接受，进入FIN_Wait_1状态，另一端(服务端)接受到这个包，返回ACK=1，ACKnum=x+1表示接受到这个请求但还没有准备好关闭服务，发送后服务端进入Close-waite，客户端接受到这个包会进入FIN-waited-2状态；服务端准备好关闭链接时，会发送FIN=1，seq=y给客户端告知，进入LAST-ACK状态，客户端接受到返回ACK=1，ACKnum=y+1确认包给服务端，进入TIME-wait状态，等待可能出现需要重传的ACK包，服务端接受到这个包后进入CLosed状态，客户端等2个最大段生命周期时间后没有受到ACK包也进入closed
 
-- 构建渲染：
+- 构建渲染(样式、布局、绘制，在某些情况下还包括合成)：
 
   - 自上而下解析HTML文档构建DOM树，遇到内联style或link的样式交由css渲染器构建css规则树，其中加载link的样式是异步的，同时构建DOM与CSSOM是并行进行的，如果遇到script标签会中断DOM树的构建，而解析js又会依赖css解析
   - 构建渲染树：从DOM中找出所有的可见节点，再找到css规则书中对应的节点合并
   - 计算元素大小和位置，painting
     - 回流：若一个元素的位置和大小发生变化则与其有关的部分就会失效进行重新构造渲染树
     - 重绘：当元素字体颜色或背景色发生变化时，渲染树不会重新构建只需要重新绘制
-    - 为避免更小粒度的变化造成多次回流或重绘(比如要实现一些复杂的动画效果，每一帧变化都会造成回流重绘)，影响页面的渲染效率，采用分层然后再合成,will-change
+    - 为避免更小粒度的变化造成多次回流或重绘(比如要实现一些复杂的动画效果，每一帧变化都会造成回流重绘)，影响页面的渲染效率，采用分层然后再合成,<video>和<canvas>，任何CSS属性为opacity、3D转换will-change
 
 - 完成页面呈现的整个过程
 
+[参考](https://developer.mozilla.org/zh-CN/docs/Web/Performance/How_browsers_work)
 
+#### 浏览器解释js代码的原理、浏览器线程进程
 
-浏览器多线程、GUI渲染进程、JS、 网络、事前监听、定时器、网络请求
+- js是解释性语言，js引擎(解释器)：V8、spiderMonkey、chakra、jsCore，所有引擎都包含一个CallStack和MemoryHeap
 
+- 打开一个浏览器开启的进程和线程(以chrome为列)：
 
+  - **浏览器进程**：浏览器最核心的进程，负责管理各个标签页的创建和销毁、页面显示和功能（前进，后退，收藏等）、网络资源的管理，下载等。
+
+  - **插件进程**：负责每个第三方插件的使用，每个第三方插件使用时候都会创建一个对应的进程、这可以避免第三方插件crash影响整个浏览器、也方便使用沙盒模型隔离插件进程，提高浏览器稳定性。
+
+  - **GPU进程**：负责3D绘制和硬件加速
+
+  - **渲染进程**：浏览器会为每个窗口分配一个渲染进程、也就是我们常说的**浏览器内核**，这可以避免单个 page crash 影响整个浏览器。
+
+    - 浏览器内核(**webkit**)是多线程，在内核控制下各线程相互配合以保持同步，一个内核一般有以下几个线程
+
+    - **GUI 渲染线程**：负责渲染浏览器界面 `HTML` 元素,当界面需要重绘(`Repaint`)或由于某种操作引发回流(reflow)时,该线程就会执行。
+
+    - **定时触发器线程**：浏览器定时计数器并不是由 `JavaScript` 引擎计数的, 因为 `JavaScript` 引擎是单线程的, 如果处于阻塞线程状态就会影响记计时的准确, 因此通过单独线程来计时并触发定时是更为合理的方案。
+
+    - **事件触发线程**：当一个事件被触发时该线程会把事件添加到待处理队列的队尾，等待JS引擎的处理。这些事件可以是当前执行的代码块如定时任务、也可来自浏览器内核的其他线程如鼠标点击、`AJAX` 异步请求等，但由于JS的单线程关系所有这些事件都得排队等待JS引擎处理。
+
+    - **异步http请求线程**：`XMLHttpRequest` 在连接后是通过浏览器新开一个线程请求， 将检测到状态变更时，如果设置有回调函数，异步线程就产生状态变更事件放到 `JavaScript` 引擎的处理队列中等待处理。
+
+    - **`JavaScript` 引擎线程**：解释和执行 JavaScript 代码
+
+      **`GUI` 渲染线程与 `JavaScript` 引擎为互斥的关系，当 `JavaScript` 引擎执行时 `GUI` 线程会被挂起， `GUI` 更新会被保存在一个队列中等到引擎线程空闲时立即被执行。**
+
+- js代码在调用栈执行经历的过程
+  - 解析器（`Parser`）：负责将 `JavaScript` 代码转换成 `AST` 抽象语法树。
+    - 词法分析：将字符序列转换为标记（`token`）序列的过程
+    - 语法分析：将这些 `token` 根据语法规则转换为 `AST`，生成 AST 的同时，还会为代码生成执行上下文
+  - 解释器（`Ignition`）：负责将 `AST` 转换为字节码，并收集编译器需要的优化编译信息。
+  - 编译器（`TurboFan`）：利用解释器收集到的信息，将字节码转换为优化的机器码。
 
 #### **SSL/TLS协议(介于TCP和http之间)运行机制**
 
@@ -70,7 +101,7 @@
 
   - **管道化**: 将多个 HTTP 请求（request）整批提交，无需先等待服务器的回应，但服务端必须按照请求顺序依次给出回应;
 
-  - **长链接:** keepalive,一个TCP连接可以复用多次;
+  - **长链接:** keepalive,一个TCP连接可以复用多次(长链接太长容易给服务端造成压力);
 
   - 缓存： 1.0缓存采用的是pragma字段进行判断，1.1新增Expires、Cache-Control、ETag/If-None-Match、Last-Modifed/If-Modified-Since(强缓存和协商缓存)
 
@@ -84,9 +115,9 @@
 
 - **HTTPS**： HTTPS是在HTTP基础上加上TLS对通信进行加密，HTTP默认端口号是80，而HTPPS是443
 
-- **HTTP2.0:**  是基于帧的协议(主流浏览器 HTTP/2 的实现都是基于 TLS )，采用分帧将重要信息封装起来，让协议的解析方可以轻松阅读、解析并还原信息，具有以下特点：
+- **HTTP2.0(重点理解):**  是基于帧的协议(主流浏览器 HTTP/2 的实现都是基于 TLS )，采用分帧将重要信息封装起来，让协议的解析方可以轻松阅读、解析并还原信息，具有以下特点：
 
-  - 多路复用： 可以并行交错发送和请求和响应，相互不影响
+  - 多路复用： 可以并行交错的发送请求和响应，相互不影响；即所有的请求和响应都在同一个 TCP 连接上发送：客户端和服务器把 HTTP 消息分解成多个帧，然后乱序发送，最后在另一端再根据流 ID 重新组合起来
 
   - 优先级： 把 HTTP 消息分解为很多独立的帧之后，就可以通过优化这些帧的交错和传输顺序，进一步提升性能
   - 服务器推送：服务器可以对一个客户端请求发送多个响应
@@ -110,23 +141,59 @@
 
 
 
-#### **Link(dns-prefetch\preconnect\preload\prefetch\prerender) 与 Script**(async 与 defer 的区别)标签，为什么css可以放在头部，js放在尾部，如果css和js必须要在头部最好把js放在css前？
+#### **Link与 Script**标签
 
-- JS 会阻塞 DOM 解析，如果放在头部，会增加first paint的时间；CSS 不会阻塞 DOM 的解析，所以可以把css放在头部，但会它阻塞 DOM 渲染和js的执行(js 中可以访问对象的class)，如果js(没有设置async或defer属性时)和css都放在头部，css放在js前，在解析js文档之前还会等待css加载，从而更增加了first plaint时间。
+- 为什么css可以放在头部，js放在尾部，如果css和js必须要在头部最好把js放在css前？
+
+  JS 会阻塞 DOM 解析，如果放在头部，会增加first paint的时间；CSS 不会阻塞 DOM 的解析，所以可以把css放在头部，但会它阻塞 DOM 渲染和js的执行(js 中可以访问对象的class)，如果js(没有设置async或defer属性时)和css都放在头部，css放在js前，在解析js文档之前还会等待css加载，从而更增加了first plaint时间。
+
   - js放在尾部，不会减少**DOMContentLoaded**(初始的html文件被加载和解析完成的时间，此时可以获取到页面的DOM节点，它在Load事件前)时间
-  - defer ：多个设置defer的script资源会马上开线程下载但是会等html解析后，DOMContentLoaded事件调用前去按顺序执行，缺少src属性，该属性不会使用，内嵌到body的script脚本默认具有defer属性
-  - async：告诉浏览器立即下载，下载完后立即执行，谁先下载完谁先执行，DOMContentLoaded并不会受async脚本的影响（若脚本在DCL调用前下载完会立即解析该脚本），但async的脚本都会在load事件调用前执行
+
+- **Link属性**:  dns-prefetch\preconnect\preload\prefetch\prerender)
+
   - **dns-prefetch**：当 link 标签的 rel 属性值为“dns-prefetch”时，浏览器会对某个域名预先进行 DNS 解析并缓存。这样，当浏览器在请求同域名资源的时候，能省去从域名查询 IP 的过程，从而减少时间损耗。
   - **preconnect**：让浏览器在一个 HTTP 请求正式发给服务器前预先执行一些操作，这包括 DNS 解析、TLS 协商、TCP 握手，通过消除往返延迟来为用户节省时间
 
+- async 与 defer 的区别
+
+  - defer ：多个设置defer的script资源会马上开线程下载但是会等html解析后，DOMContentLoaded事件调用前去按顺序执行，缺少src属性，该属性不会使用，内嵌到body的script脚本默认具有defer属性
+  - async：告诉浏览器立即下载，下载完后立即执行，谁先下载完谁先执行，DOMContentLoaded并不会受async脚本的影响（若脚本在DCL调用前下载完会立即解析该脚本），但async的脚本都会在load事件调用前执行
 
 
-什么是BFC？哪些元素会创建BFC？
 
-1. - 元素的absolute或fixed (定位absolute(离最近的非static祖先元素) 和relative(相对自身原本位置)相对于那个元素定位？fixed: 相对于浏览器视口固定，sticky: 类似于static，当相对视口位置达到预设值时，按照fixed定位)
-- Float 不为 none的元素
-  
-     
+
+#### 跨域和同源的理解？
+
+- 实现跨域的方法：JSONP、CORS(跨域资源共享)、nginx代理跨域、websocket协议跨域、postMessage（window.parent.postMessage(data,origin)）、iframe+(document.domain、location.hash、 window.name)、
+
+  - JSONP
+    - 原理：其本质是用script标签src实现，动态创建script，再请求一个带参网址实现跨域通信
+    - 缺点：前后端配合，只能实现get
+
+  - CORS(一般用于XMLHttpRequest)
+
+    - 原理： 
+
+      - 通过请求头Origin <== >响应头部字段 Access-Control-Allow-Origin: * 配合实现（不安全）
+
+      - 如果要携带cookie请求跨域，则要设置XMLHttpRequest的标志位withCredentials为true，如果服务器端的响应中未携带 `Access-Control-Allow-Credentials:` true，浏览器将不会把响应内容返回给请求的发送者;
+      - 对于附带身份凭证的请求（通常是 `Cookie`），服务器不得设置 `Access-Control-Allow-Origin` 的值为“`*`” 
+
+
+
+#### 常见的性能优化手段？
+
+   要从几个方面系统的介绍
+
+- 资源大小：压缩资源、webpack treeshaking插件、split chunk分包、懒加载按需引入、图片webp格式
+- 缓存：合理利用浏览器缓存(强缓存时间和协商缓存, hash chunkhash contenthash)
+- 网络： DNS预解析、CDN缓存、http1.x升级到2(多路复用)
+- 渲染：如果实现动画，优先选用css，transform 和will-change，尽量减少重绘和回流
+- 代码层面：合理利用框架，给数据做缓存，纯组件等形式
+
+
+
+   
 
 2. 垂直居中，水平居中方法，四种？
     水平居中： *. {margin: 0 auto} *. 父元素 {display: flex; justify-content: center;}
@@ -160,18 +227,8 @@
    middle 设置 margin-left margin-right ,值分别为left right元素的宽度（如果middle有定宽元素缩小屏幕时则会重叠）
     *.浮动 + 绝对定位 left 和 right 元素设置 {float: left / right} .middle {position : absolute; left: xxpx; right: xxpx;}
 
-6. 什么是flex布局？
-    flex弹性布局，一般分为主轴和交叉轴，主轴是排列方向，
-    flex-direction： 可以设置主轴方向，row， column；
-    flex-wrap: wrap or noWrap(如果主轴排列不下，是否换行);
-    flex-flow: flex-direction和wrap的缩写；
-    flex: auto（1 1 auto） initial(0 1 auto) none(0 0 auto) <positive-numner>(number number 0)
-      item项可以设置flex 值，给每个item设置剩余空间等分，
-      flex-grow(无单位比例值): 分配父元素剩余宽度，子元素总共为几就分成几份（子元素的宽度的总和超过父容器，flex-grow 将不生效）;
-      flex-shrink: 溢出时需要去除多少溢出量以免溢出屏幕(总溢出量 / 子元素总份额 * shrink值，有在flex元素总和超出主轴才会生效)；
-      flex-basis: 给每个item设置主轴方向最小占比值（200px 等, 宽或高等，如果一个子元素同时设置了宽或高和basis值，则basis 权重高于设置的宽或高）;
-7. <head> 下的字段，自适应设置那个？<meta name="viewpoint" content="">
-8. **行内元素块元素的区别？**
+6. <head> 下的字段，自适应设置那个？<meta name="viewpoint" content="">
+7. **行内元素块元素的区别？**
    inline:
     盒子不会产生换行。
     width 和 height 属性将不起作用。
@@ -182,12 +239,12 @@
     每个盒子都会换行
     width 和 height 属性可以发挥作用
     内边距（padding）, 外边距（margin） 和 边框（border） 会将其他元素从当前盒子周围“推开”
-9. 为什么css可以放在头部，js放在尾部，如果css和js必须要在头部最好把js放在css前？
+8. 为什么css可以放在头部，js放在尾部，如果css和js必须要在头部最好把js放在css前？
+
   * CSS 不会阻塞 DOM 的解析，但会阻塞 DOM 渲染。
   * JS 阻塞 DOM 解析，但浏览器会"偷看"DOM，预先下载相关资源。
   * 浏览器遇到 <script>且没有defer或async属性的 标签时，会触发页面渲染，因而如果前面CSS资源尚未加载完毕时，浏览器会等待它加载完毕在执行脚本。(https://juejin.cn/post/6844903497599549453)
 10. html 元素 (https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element)
-11. 跨域和同源的理解？xss攻击原理例子？
 12. 浏览器加载模块<script type="module" src=""> 相当于设置了defer属性，并且浏览器加载模块是在DOM创建完成之后，且DOMContentLoaded之前执行
 
 
