@@ -296,8 +296,8 @@ function throttle (fn, delay) {
         timer = null;
       }, interval);
     } else {
-      lastTime = Date.now();
       fn.apply(context, args);
+      lastTime = Date.now();
       // 每次执行后 清空timer保证下个周期的timeOut调用能正常加入队列
       clearTimeout(timer);
       timer = null;
@@ -358,6 +358,39 @@ function multiply(a, b) {
   const res =
         a * Math.pow(10, aFixed)* b * Math.pow(10, bFixed) /Math.pow(10, aFixed + bFixed);
   return res.toFixed(aFixed + bFixed);
+}
+
+const isNeedFlat = (args) => !!args.some((value) => Array.isArray(value));
+function flatArray (arrs) {
+  // if (isNeedFlat(arrs)) {
+  //   return arrs.reduce((acc, cur) => {
+  //     if (Array.isArray(cur)) {
+  //       if (isNeedFlat(cur)) {
+  //         acc.push(...flatArray(cur))
+  //       } else {
+  //         acc.push(...cur)
+  //       }
+  //     } else {
+  //       acc.push(cur)
+  //     }
+  //     return acc;
+  //   }, [])
+  // }
+  // return arrs
+  const newArr = [];
+  arrs.forEach((cur, index) => {
+    // console.log(index, '===>', cur, Array.isArray(cur));
+    if (Array.isArray(cur)) {
+      if (isNeedFlat(cur)) {
+        newArr.push(...flatArray(cur));
+      } else {
+        newArr.push(...cur);
+      }
+    } else {
+      newArr.push(cur)
+    }
+  });
+  return newArr
 }
 
 

@@ -345,7 +345,7 @@ class MyPromise {
         // 异步调用是为了拿到thenPromise值
         setTimeout(() => {
           // 若then回调返回的Promise出现错误，需要被后续的then或catch捕获
-          // 注意，要在timeOut内部try catch，因为这一步的目的是要捕获到会带哦中一些执行出现的错误，如果
+          // 注意，要在timeOut内部try catch，因为这一步的目的是要捕获到回调中一些执行出现的错误，如果
           // 放在外面，因为是异步执行TimeOut内的代码，所以try catch不会捕获到
           try {
             const thenValue = successCall(this.value);
@@ -438,7 +438,7 @@ class MyPromise {
             arrValue.then((v) => {
               addData(v, index);
             }, (err) => {
-              key ++;
+              // key ++;
               reject(err);
             });
           } else {

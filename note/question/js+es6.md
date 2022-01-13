@@ -4,24 +4,24 @@
 
 - 什么是面向对象，面向对象有哪些特点，以及这些特点的解释(基础点)
   - 面向对象是基于面向过程而言，是把一个个问题抽象成对象的形式，把解决问题的方法作为这个对象的属性或方法
-  
+
   - 面向对象具有封装、继承、多态的特性
     - 封装： 其主要目的是为数据提供有效性准确性和安全性，以及更好的代码复用，从设计层面在代码级别上对实现层面的管理和控制，降低开发风险或成本；像访问修饰符(public private 默认 protected等)、对象的get (读)或set(修改)方法、以及使用的一些api或平时使用的框架都是对封装的一种实践
-    
+
     - 继承：是指某个对象能获得另一个对象的属性和方法，继承可以实现使用现有的类方法属性而不需要额外的编码；实现继承一般通过inheritance和composition两种方式，从继承概念上来说又可以有接口继承和实现继承，实现继承完全复用父类的属性方法，接口继承则是复用属性和方法的名称，其具体的实现方式还需子类内部自己实现。在es中，其实一开始是没有类的概念，就算新的es6中的类也是es5构造+原型继承上的一种语法糖，而且es中没有函数签名的概念，所以在继承实现方面，不能用接口实现继承，只能支持实现继承。
-    
+
       - **构造函数模式**： 为创建对象es提出了构造函数模式，但是这种方法存在的一个问题是每次实例化对象的时候都会新建一个新的方法，函数也是一个对象，这样就导致不同实例上的同名函数其实不相等；
-    
+
       - **原型链继承**： 所以基于此引入了原型链继承的概念，通过设置构造函数的prototype，所有实例内部_proto_指向原型对象，原型继承最大的问题是如果原型上是一个引用对象，当一个实例更改这个引用对象后，所有实例的这个值都会被修改，不能向超类型中的构造函数传递参数；
-    
+
       - **借用构造函数**：在子类型的构造函数内调用超类的构造函数方法(**SuperType.call(this)**),可以想超类传参，但是也有构造函数带来的问题，以及超类的原型上的属性和方法不能获取
-    
+
       - **组合继承**： 基于此，又提出了组和继承(原型链+借用构造函数)，通过构造函数定义实例的属性，而原型上定义实例共享的属性和方法，这种方式应该是目前es中应用最广泛的一中模式；组合继承其实也存在一种问题，就是当子类要重写父类一些属性时，父类的构造函数会调用两次，一次是在给子类原型赋值，另一个就是在子类构造函数中；
-    
+
       - 如果这几种继承都不适用，又提出了**原型式继承(Object.create())**、**寄生式继承**和**寄生组合式继承**，
-    
+
         - 原型式继承在函数内部(obejct(o))临时定义个构造函数，把o作为构造函数的原型对象，返回这个构造函数的实例；Object.create()就是对这种继承方式的规范化实现，这种也存在包含 引用类型值的属性会共享该值；
-    
+
           ```js
           function object (o) {
             function F() {};
@@ -29,45 +29,45 @@
             return new F();
           }
           ```
-    
-          
-    
-        - 寄生式继承其实就是创建一个封装继承过程的函数,在函数内部对传入的对象进行增强，然后返回增加的对象，但这种也会存在于构造函数模式一样的问题，函数不能复用；
-    
-          ```js
-          function createAnother (original) {
-            const clone = object(original);
-            // 对clone对象进行增加
-            clone.ownMethod = () => {};
-            return clone
-          }
-          ```
-    
-          
-    
-        - 寄生组合继承，寄生组合继承就是借用构造函数继承属性，原型链的混成形式继续方法，不必为了指定子类型的原型而调用超类型的构造函数，一般这种模式普遍被认为是理想的模式，
-    
-          ```js
-           function inheritPrototype (SuperType, SubType) {
-          	const prototype = object(SuperType.prototype);
-            prototype.constructor = SubType
-            SubType.prototype = prototype;
-          }
-          ```
-    
-        - **原型的考点**
-        
-          constructor的指向，instanceOf的手动实现，原型链的尽头(Object.prototype._proto_ === null),原型链的属性屏蔽问题（原型链上有且writeable为true会重写，writeable为false则无法修改，如果是个setter，则一定会调用这个setter，不会屏蔽也不会重新定义），创建一个纯净的对象(Obejct.create(null)), 
-        
-          ```js
-          // 实现instanceof
+  
+      - 寄生式继承其实就是创建一个封装继承过程的函数,在函数内部对传入的对象进行增强，然后返回增加的对象，但这种也会存在于构造函数模式一样的问题，函数不能复用；
+  
+        ```js
+        function createAnother (original) {
+                const clone = object(original);
+                // 对clone对象进行增加
+                clone.ownMethod = () => {};
+                return clone
+              }
+        ```
+  
+      - 寄生组合继承，寄生组合继承就是借用构造函数继承属性，原型链的混成形式继续方法，不必为了指定子类型的原型而调用超类型的构造函数，一般这种模式普遍被认为是理想的模式，
+  
+        ```js
+        function inheritPrototype (SuperType, SubType) {
+              	const prototype = object(SuperType.prototype);
+                prototype.constructor = SubType
+                SubType.prototype = prototype;
+              }
+        ```
+  
+      因为es中继承各种或多或少的问题，所以再现在开发中引入TS，辅助开发。extends用于扩展父类，mixin混合多种类组成新的类
+  
+    - 多态：针对某个对象的方法或属性，在实际运行时可能会有不同的实现，体现了可扩展性和多样性
+  
+  - **原型的考点**
+  
+    constructor的指向，instanceOf的手动实现，原型链的尽头(Object.prototype._proto_ === null),原型链的属性屏蔽问题（原型链上有且writeable为true会重写，writeable为false则无法修改，如果是个setter，则一定会调用这个setter，不会屏蔽也不会重新定义），创建一个纯净的对象(Obejct.create(null)),
+  
+    ```js
+    // 实现instanceof
           function myInstanceof (instance, constructorFn) {
-            // instance 为普通类型或null则返回true
+            // instance 为普通类型或null则返回false
             // constructorFn 为构造函数
             if (typeof constructorFn !== 'function')  throw new Error('');
             if ((typeof instance !== 'function' && typeof instance !== 'object') || null) return false;
             // 循环查找instance的原型对象是否是constructorFn的prototype,直到instance的原型对象为null
-            let protoObj = constructorFn.prototype
+            const protoObj = constructorFn.prototype
             while (instance.__proto__) {
               if (protoObj === instance.__proto__) {
                 return true;
@@ -76,20 +76,13 @@
             }
             return false;
           }
-          
-          ```
-          
-          
-      
-      因为es中继承各种或多或少的问题，所以再现在开发中引入TS，辅助开发。extends用于扩展父类，mixin混合多种类组成新的类
-    
-    - 多态：针对某个对象的方法或属性，在实际运行时可能会有不同的实现，体现了可扩展性和多样性
-  
-- JavaScript 如何实现这些特点，比如封装、继承、多态。如果关于上述三点，你能够解释到有多少种实现方式、优缺点是什么。以及近几年流行的解决方案是什么。这就是**「加分」**，比如对于继承吧。类式继承、构造函数继承、组合继承、原型继承、寄生组合继承等等，说出大概的实现思路和优缺点，再介绍下 extends 或者 mixin 的实现甚至你可以衍生到JavaScript 的模块化发展甚至到为什么现在 TS 如此流行。那么可以说到这一环节解答的就非常棒了。
+    ```
 
-- 为什么需要面向对象。以及当先对于软件设计的高内聚、低耦合的思考？
+JavaScript 如何实现这些特点，比如封装、继承、多态。如果关于上述三点，你能够解释到有多少种实现方式、优缺点是什么。以及近几年流行的解决方案是什么。这就是**「加分」**，比如对于继承吧。类式继承、构造函数继承、组合继承、原型继承、寄生组合继承等等，说出大概的实现思路和优缺点，再介绍下 extends 或者 mixin 的实现甚至你可以衍生到JavaScript 的模块化发展甚至到为什么现在 TS 如此流行。那么可以说到这一环节解答的就非常棒了。
 
-  
+为什么需要面向对象。以及当先对于软件设计的高内聚、低耦合的思考？
+
+
 
 
 
@@ -107,7 +100,7 @@
 
   - 所以整体执行逻辑是，先执行同层级代码的宏任务，再执行当前宏任务下的微任务(包含微任务后又产生的微任务)，等同层级微任务执行完毕再执行下一个宏任务...这样就形成事件的循环
 
-    
+
 
   - JS 异步编程
 
@@ -123,6 +116,8 @@
 
   当前主线程的宏任务执行完出队，检查并清空微任务队列。接着执行浏览器 UI 线程的渲染工作（有时候是不会渲染的，hasARenderingOpportunity为false就不会渲染，requestAnimationFrame来渲染避免掉帧），检查web worker 任务，有则执行(requestIdleCallback执行时机)。
 
+  
+
   然后再取出一个宏任务执行。以此循环...
 
 - 宏任务与微任务
@@ -132,10 +127,22 @@
     浏览器为了让 JS 内部宏任务 与 DOM 操作能够有序的执行，会在一个宏任务执行结束后，在下一个宏任务执行开始前，对页面进行重新渲染。
 
     宏任务包含：script(整体代码)、setTimeout、setInterval、I/O、UI交互事件、MessageChannel 、UI rendering、requestIdleCallback、setIntermidate（node有）
+
+  - **微任务**： 可以理解是在当前任务执行结束后需要立即执行的任务。也就是说，在当前任务后，在渲染之前，执行清空任务。 所以它的响应速度相比宏任务会更快，因为无需等待 UI 渲染。
+
+     微任务包含：Promise.then(async await语法糖)、MutaionObserver(对DOM树进行监测)、process.nextTick(Node.js 环境)等
   
-     - **微任务**： 可以理解是在当前任务执行结束后需要立即执行的任务。也就是说，在当前任务后，在渲染之前，执行清空任务。 所以它的响应速度相比宏任务会更快，因为无需等待 UI 渲染。
+     > 根据Rendering opportunities来判断每轮`event loop`是否需要进行更新渲染，会根据浏览器刷新率以及页面性能或是否后台运行等因素判断的。如果`hasARenderingOpportunity` 为`true`，需要更新渲染，接下来就需要执行各种渲染所需工作：
+     >
+     > - 触发resize、scroll、建立媒体查询、建立css动画，
+     > - 执行动画回调（RAF回调，RAF会在下次渲染之前调用指定回调所以用来渲染动画避免掉帧)；若想在浏览器下次渲染之前继续更新下一帧动画，回调函数内必须再次调用RAF
+     > - 执行IntersectionObserver回调
+     > - 更新渲染
+     >
+     > - 判断是否启动`闲时调度算法`RIC
   
-       微任务包含：Promise.then(async await语法糖)、MutaionObserver(对DOM树进行监测)、process.nextTick(Node.js 环境)等
+
+参考： [浏览器渲染更新机制](https://juejin.cn/post/6885907453460873229)、[HTML](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model)
 
 **涉及浏览器渲染机制的事件模型**
 
@@ -152,9 +159,7 @@
     1. 设置顶层浏览器环境为空
     2. 对于每个最老Task的脚本执行环境配置对象，设置当前的顶级浏览器上下文到其上
     3. 报告消耗过长的任务，并附带开始时间，结束时间，顶级浏览器上下文和当前Task
-11. 如果在window环境下，会根据硬件条件决定是否渲染，比如刷新率，页面性能，页面是否在后台，不过渲染会定期出现，避免页面卡顿。值得注意的是，正常的刷新率为60hz，大概是每秒60帧，大约16.7ms每帧，如果当前浏览器环境不支持这个刷新率的话，会自动降为30hz，而不是丢帧。而李兰其在后台的时候，聪明的浏览器会将这个渲染时机降为每秒4帧甚至更低，事件循环也会减少(这就是为什么我们可以用setInterval来判断时候能打开其他app的判断依据的原因)。如果能渲染的话会设置hasARenderingOpportunity为true。
-
-> 除此之外，还会在触发resize、scroll、建立媒体查询、运行css动画等，也就是说浏览器几乎大部分用户操作都发生在事件循环中，更具体点是事件循环中的ui render部分。之后会进行requestAnimationFrame和IntersectionObserver的触发，再之后是ui渲染
+11. 如果在window环境下，会根据硬件条件决定是否渲染，比如刷新率，页面性能，页面是否在后台，不过渲染会定期出现，避免页面卡顿。值得注意的是，正常的刷新率为60hz，大概是每秒60帧，大约16.7ms每帧，如果当前浏览器环境不支持这个刷新率的话，会自动降为30hz，而不是丢帧。在后台的时候，聪明的浏览器会将这个渲染时机降为每秒4帧甚至更低，事件循环也会减少(这就是为什么我们可以用setInterval来判断时候能打开其他app的判断依据的原因)。如果能渲染的话会设置hasARenderingOpportunity为true。
 
 1. 如果下面条件都成立，那么执行空闲阶段算法，对于开发者来说就是调用window.requestIdleCallback方法
    1. 在window环境下
@@ -175,7 +180,7 @@
 - 函数作用域：函数在创建的时候就明确了作用域[[SCOPE]]，就是创建时所处的执行上下文对应的活动对象
   - 函数调用基本会有几个步骤：确定作用域链（最左边就是自己的作用域，最右边就是ECG），确定this，初始化arguments，形参赋值(相当于在当前AO中新增一个变量)，变量提升，代码运行
   - 模块模式：IIFE(ES5尚未支持块级作用域，使用此方法模拟块级，封装模块)，在IIFE中**绑定为函数名的标识符不能再绑定为其它值，即该标识符绑定是不可更改的**
-  
+
 - 作用域链：当代码在一个环境中执行时，会创建变量对象的一个作用域链，其作用是保证对当前执行环境有权访问的变量和函数进行有序访问，作用域链的前端，始终都是当前执行的代码所 在环境的变量对象，全局执行环境的变量对象始终都是作用域链中的最后一个对象
 
 - 闭包： 闭包是一种机制，当前函数执行时创建的执行的上下文不会被销毁，闭包可以保护这个私有上下文中的变量不受其他上下文的变量影响，而且当前上下文创建的数据可以被当前上下文以外的变量引用
@@ -203,7 +208,7 @@
   c.fun2(3);
   ```
 
-  
+
 
 ### var、let 、const
 
@@ -215,7 +220,7 @@
 
 ### this的指向问题
 
-- 定义：this是当前函数执行的主体，即谁执行了函数，不等于执行上下文也不是当前作用域  
+- 定义：this是当前函数执行的主体，即谁执行了函数，不等于执行上下文也不是当前作用域
 
 - 在标准函数中this引用的是调用这个函数时的对象，(全局上下文中就是window，o.Foo(), Foo中的this就是o，匿名函数自调用一般是window | undefined)；回调函数的this一般也是window或undefined
 
@@ -231,7 +236,7 @@
     - **构造函数有无返回(不返回或返回一个基本数据类型都相当于不返回)，**有且不为空的一个**对象**返回这个对象，否则就返回新建的新对象
       new Class(使用new 调用的是class的构造函数)
     - new Foo  (优先级19) 和 new Foo() (优先级20) 优先级不一样， new 操作符都会将函数重新执行
-    
+
 - **bind、apply、call、new 的自己实现、一些console题**
 
     ```js
@@ -276,7 +281,7 @@
     
     ```
 
-    
+
 
 ### 函数式编程、高阶函数、函数柯里化
 
@@ -284,6 +289,7 @@
 
   - 纯函数： 传入相同的值返回相同
   - 副作用：异步函数，返回值不一定相同
+  - 函数是一等公民，函数可作为参数或返回值
 
 - 高阶函数：抽象代码，让代码更简洁、逻辑更清晰、能更注重业务逻辑
 
@@ -293,6 +299,7 @@
   // 参数是个函数，返回的也是个函数
   // 返回的函数可以分多次传入参数
   // 在返回的函数内部，当接受的参数个数与最原始参数值相同(或大于)时要执行这个函数，参数小于原本的参数个数时返回一个函数
+  // 如果fn = (...rest) => {}用扩展运算符来传入参数此时，fn.length的值为0
   function curry (fn) {
     return function curried(...args) {
       if (args.length < fn.length) {
@@ -306,45 +313,87 @@
 - compose实现：对函数进行组合，传入多个函数返回一个函数
 
   ```js
-  const compose = (...fn) => {
+  const compose = (...fns) => {
     // 应为从右向左执行等
-    return (...rest) => fn.reverse().reduce((accFn, currFn) => accFn(fn(...rest)), rest)
+    // 考虑fns长度为0的时候(...rest) => rest,fns 长度为1 fns[0]返回自身，其他则如下
+    return (...rest) => fns.reverse().reduce((accFn, currFn) => accFn(currFn(...rest)))
   }
   ```
 
-  
+
 
 ### 设计模式
 
 
 
 ### Promise 手动实现、考题
+- 具体 code 实现在interviewCode/promise.js
 
+- then catch finally, 静态方法：resolve reject all race any allSettled 
 
-
-### 节流防抖实现
+- ```js
+  // 传入的是一个函数带resolve reject 回调，构造函数执行constructor期间就执行此参数，如果出错就直接reject
+  // resolve reject只能改变一次状态，即不是pending就直接返回,且在这里要保存resolve的value值或reason值,执行缓存的未处理的回调函数
+  // then 方法： 返回一个新的promise（重点掌握）
+  then(success, failed) {
+    // success不是函数则是 (value) => value, failed不是函数则抛出错误 reason => throw Error()
+    const returnPromise = new Mypromise((res, rej) => {
+      if (status === 'fulfilled') {
+        // settimeout是为了再后续处理中拿到then本身返回的promise
+        thenFunc(success, value, res, rej)
+      } else if (status === 'REJECTED') {
+         thenFunc(failed, reason, res, rej)
+      } else {
+        this.cacheSuscessCallback.push(() => thenFunc(success, value, res, rej));
+        this.cacheFailedCallback.push(thenReject);
+      }
+      
+      function resolveCallValue (returnPromise, callValue, res, rej) {
+        // 若then方法返回的Promise与then回调执行后返回的值相等，则要rej个error,
+        rej(new TypeError('Type Error'));
+        // 若then回调中返回的值是MyPromise的一个实例，则执行这个callValue 的then方法
+        callValue.then(res, rej)
+        // 其他情况就直接res(callValue)
+      }
+      function thenFunc = (fn, value, res, rej) => {
+        setTimeout(() => {
+          // 执行函数 then 中的回调函数要try catch，保证出错的时候能被后续方法捕获到
+          try {
+            const callValue = fn(value) // callValue 可能是普通值、Promise
+            resolveCallValue(returnPromise, callValue, res, rej)
+          } catch (error) {
+            rej(error)
+          }
+        })
+      }
+    })
+  }
+  ```
 
   
 
+### 节流防抖实现
+
+- interviewCode/try2Do.js debounce
+
+###  什么是浅拷贝，什么是深拷贝？
+
+ 　浅拷贝和深拷贝主要是针对引用类型的数据而言，浅拷贝只拷贝引用类型的内存地址，即新对象的引用值与旧对象的值占同一个内存空间，如果改变其中任何一个值都会影响另外一个值；而深拷贝则会对引用类型的值再重新开辟一片内存空间存当前对象，且他们之间相互独立，对各自操作将不会影响另外的值。
+
+- 浅拷贝：针对 Object,Array 这种复杂数据类型，浅拷贝复制一层对象的属性，属性中的值是基本数据类型直接复制值，如果是引用类型复制内存地址的指针，所以在修改复制后的变量里引用类型的里面的值时，会导致原始数据也被修改
+  - Object.assign()、Object.create()、扩展运算符、直接赋值、
+- 深拷贝：针对 Object,Array 这种复杂数据类型，深复制递归复制了所有的层级，新数据和原始数据不存在联系，因此在修改复制后的变量里引用类型的里面的值时，不会导致原始数据也被修改
+  - JSON.parse(JSON.stringify())： 无法正确处理undefined、function、symbol、set、map等类型的值
+  - 迭代递归，分别处理不同类型对应的值
+
+
+
+
+
 1. 排序算法(至少三种)*
-
-2. 函数柯里化
-
-3. 数组去重
-
-4. Mixins 和 高阶函数 、Hook
-
-5. sum(1) sum(1)(2)(3)(4) sum(1, 2, 3, 4);
-
-6. node 的模块
-
-7. 模块知识、JS怎么实现继承？
-
-8. ***宏任务、微任务、事件循环、任务队列、调用栈(Call Stack 、Execution Context)？
-
-    事件循环是执行栈和消息队列的桥梁
-
-    
+2. 数组去重
+3. Mixins 和 高阶函数 、Hook
+4. sum(1) sum(1)(2)(3)(4) sum(1, 2, 3, 4);
 
 9. 进程与线程？
 
@@ -412,7 +461,7 @@
 
      then中的回调函数执行不报错范湖都是fulfilled的promise，如果返回的是promise，就是这个返回promise的状态
 
-16. Async 
+16. Async
 
      async函数执行返回的是一个promise，如果函数体内没有报错，返回的就是fulfilled的promise值为函数返回的值，没有就是undefined
 
@@ -424,7 +473,7 @@
        函数内部存在的对象：
        arguments : (callee指向arguments所在函数的指针)
 
-    
+
 
 18. Date RegExp 等创建的实例都有 toLocalString() toString() valueof() 等方法；
         原始值包装类型：
