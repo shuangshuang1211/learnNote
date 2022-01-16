@@ -1,3 +1,8 @@
+**什么是泛型？**
+
+- 定义可复用的接口模板
+- 
+
 1. type(类型别名) 和 interface 区别？
 
    - type 没有新建名字，显示错误的信息会是对象字面量类型，interface会创建一个名字，可以直接显示接口名字
@@ -5,8 +10,6 @@
    - type不能 extends或implements 其他类型，也不能被extends或implements
 
 2. 箭头函数能保存函数创建时的 this值，而不是调用时的值;
-
-3. 什么是泛型？定义可复用的接口模板
 
 4. 接口(interface) vs. 类型别名(type)
 
