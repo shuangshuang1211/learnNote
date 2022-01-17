@@ -1,0 +1,28 @@
+{% extends "layout.njk" %}
+
+{% block content %}
+  {% import 'macros/navgation.njk' as nav %}
+  {% import 'macros/serviceMode.njk' as serviceMode %}
+  {% import 'macros/subMenu.njk' as subMenu %}
+  {{nav.active(navs, 'servicemode')}}
+  <!-- Page Content -->
+  <div class="container">
+    <!-- Heading Top Row -->
+    {% include "partials/topImage.njk" %}
+    <!-- Content row -->
+    <div class="row" id="serviceMode">
+      <div class="col-md-12 mb-5 h-100 row justify-content-between" >
+        <div class="col-md-3 mb-5 justify-content-between sub-menu" >
+          {{subMenu.renderSubMenus("服务模式", [])}}
+        </div>
+        {{serviceMode.renderSubContent(serviceModeTables)}}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    
+  </script>
+{% endblock %}

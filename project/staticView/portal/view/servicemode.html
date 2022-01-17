@@ -1,0 +1,435 @@
+<!-- layout.nunjucks -->
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>西北大学公共计算平台</title>
+    <style type="text/css">
+
+    </style>
+    <!-- Bootstrap core CSS -->
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="../static/css/small-business.css" rel="stylesheet">
+    <link href="../static/css/page.css" rel="stylesheet">
+  </head>
+
+  <body>
+    
+  
+  
+  
+  
+  <!-- Navigation -->
+  <nav id="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <img class="img-circle" id="titleIcon" src="../static/image/nwu.png" alt="">
+      <a class="navbar-brand" href="#">西北大学公共计算平台</a>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul id="titleList" class="navbar-nav ml-auto">
+          
+            <li class="nav-item ">
+              <a class="nav-link" id="main" href="./main.html">首页
+              </a>
+            </li>
+          
+            <li class="nav-item ">
+              <a class="nav-link" id="platformoverview" href="./platformoverview.html">平台概况
+              </a>
+            </li>
+          
+            <li class="nav-item  active ">
+              <a class="nav-link" id="servicemode" href="./servicemode.html">服务模式
+              </a>
+            </li>
+          
+            <li class="nav-item ">
+              <a class="nav-link" id="rulesandregulations" href="./rulesandregulations.html">规章制度
+              </a>
+            </li>
+          
+            <li class="nav-item ">
+              <a class="nav-link" id="operationguide" href="./operationguide.html">服务指南
+              </a>
+            </li>
+          
+            <li class="nav-item ">
+              <a class="nav-link" id="contact" href="./contact.html">联系我们
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    </div>
+    <div>
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" id="loginBtn" href="../../user/index.html">平台入口</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="container">
+    <!-- Heading Top Row -->
+    <div class="text-white py-4 text-center">
+  <img class="img-rounded img-thumbnail" src="../static/image/center.png" id="centerIcon" alt="">
+</div>
+    <!-- Content row -->
+    <div class="row" id="serviceMode">
+      <div class="col-md-12 mb-5 h-100 row justify-content-between" >
+        <div class="col-md-3 mb-5 justify-content-between sub-menu" >
+          
+  <!-- Sub menu -->
+  <h2 class="col-md-12 sub-title" id="subTitle">服务模式</h2>
+  
+
+        </div>
+        
+  <!-- Content -->
+  <div class="col-md-9 mb-5 row justify-content-between">
+    <div class="col-md-12 mb-5 row justify-content-between" id="serviceModeContent">
+      <h3 class="col-md-12 sub-content-title" id="subContentTitle">服务模式</h3>
+      <p class="col-md-12 p-line-height p-margin p-text-justify" id="serviceModeP1Content">
+        &emsp;&emsp;为了满足全校师生复杂多样的个性化计算需求，适应新型计算模式如人工智能训练等对运行环境的复杂要求，
+        高性能计算平台的建设除了在硬件设备的选型上充分考虑了计算的多样性，提供了包含CPU节点、GPU节点的丰富算力组合，
+        在软件平台的建设上也采用了区别于传统超算中心的作业调度系统的解决方案，在不损失计算性能的前提下以灵活多样的方式提供服务。
+      </p>
+      
+      <p class="p-margin p-text-justify" id="serviceModeP2Content">
+  <!-- Table -->
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        
+          <th class="table-center table-middle"></th>
+        
+          <th class="table-center table-middle">公共集群</th>
+        
+          <th class="table-center table-middle">独占集群</th>
+        
+          <th class="table-center table-middle">私有/共享实例</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+      
+        <tr>
+          
+            <td class="table-middle  table-center ">
+              
+                适用人群
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                对Linux命令行和作业调度系统比较熟悉
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                对Linux命令行和作业调度系统比较熟悉，计算量非常大。
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                不熟悉Linux，习惯交互式图形界面。无计算机背景的新用户建议使用这种模式。
+              
+            </td>
+          
+        </tr>
+      
+        <tr>
+          
+            <td class="table-middle  table-center ">
+              
+                应用场景
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                全校共享一个计算集群，多用户排队提交作业
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                个人/院系独占集群资源，可自定义集群内部运行环境，自主安装系统应用
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                个人独占/多人共享单节点资源
+              
+            </td>
+          
+        </tr>
+      
+        <tr>
+          
+            <td class="table-middle  table-center ">
+              
+                执行方式
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                SLURM作业提交
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                自主安装作业调度系统或直接多节点并行
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                交互式提交
+              
+            </td>
+          
+        </tr>
+      
+        <tr>
+          
+            <td class="table-middle  table-center ">
+              
+                节点数量
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                预分配固定节点
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                规模可伸缩
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                单节点
+              
+            </td>
+          
+        </tr>
+      
+        <tr>
+          
+            <td class="table-middle  table-center ">
+              
+                应用类型
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                绝大多数计算任务
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                绝大多数计算任务
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                CentOS、Ubuntu系统，Jupyter、RStudio、MATLAB等有交互界面的计算任务。
+              
+            </td>
+          
+        </tr>
+      
+        <tr>
+          
+            <td class="table-middle  table-center ">
+              
+                申请资源
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                编写资源申请脚本，使用作业调度软件提交作业
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                Web页面申请集群，编写资源申请脚本，登录集群后提交作业
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                在Web界面申请资源，使用Linux命令行或者VNC操作服务器
+              
+            </td>
+          
+        </tr>
+      
+        <tr>
+          
+            <td class="table-middle  table-center ">
+              
+                计费方式
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                从作业启动后开始计费，直到作业结束，作业结束后资源自动释放。
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                从启动计算资源开始计费，直到资源释放为止。有最长使用期限，超过最长使用期限后系统自动释放资源，用户也可以自己手动释放资源。
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                从启动计算资源开始计费，直到资源释放为止。有最长使用期限，超过最长使用期限后系统自动释放资源，用户也可以自己手动释放资源。
+              
+            </td>
+          
+        </tr>
+      
+        <tr>
+          
+            <td class="table-middle  table-center ">
+              
+                图形界面
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                不支持
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                支持
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                支持
+              
+            </td>
+          
+        </tr>
+      
+        <tr>
+          
+            <td class="table-middle  table-center ">
+              
+                客户端ssh
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                支持
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                支持
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                不支持
+              
+            </td>
+          
+        </tr>
+      
+        <tr>
+          
+            <td class="table-middle  table-center ">
+              
+                root权限
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                否
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                是
+              
+            </td>
+          
+            <td class="table-middle  table-center ">
+              
+                是
+              
+            </td>
+          
+        </tr>
+      
+    </tbody>
+  </table>
+</p>
+      <p class="col-md-12 p-line-height p-margin p-text-justify" id="serviceModeP3Content">
+        &emsp;&emsp;如上表所示，计算云主要支持三种模式：
+        <br />&emsp;&emsp;对于计算资源使用量较大、有一定Linux命令行基础的用户，可以考虑使用公共集群或者独占集群模式。
+        这两种模式都使用作业调度系统提交作业。不同在于公共集群按作业运行时长来计费，独占集群的计费从申请资源开始到资源释放，如果中间并未运行作业，依然计费。
+        <br />&emsp;&emsp;如果对Linux命令行不熟悉，我们提供了私有实例模式，可以在“申请资源”处申请有交互界面的计算资源，提供了Jupyter等有交互界面的工具，上手简单，无需学习Linux，
+        适用于无计算机背景的新用户。此模式优点是学习成本低，缺点是计费方式粒度粗，不适合有大量计算任务的用户。用户也可以前期使用这类交互界面实例，如发现计算量较大，
+        建议逐渐迁移到公共集群模式上，该模式计费更准确。
+      </p>
+    </div>
+  </div>
+
+      </div>
+    </div>
+  </div>
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; 西北大学 2020</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="../static/js/jquery.min.js"></script>
+    <script src="../static/js/bootstrap.bundle.min.js"></script>
+    
+  <script>
+    
+  </script>
+
+  </body>
+</html>
