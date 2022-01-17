@@ -1,9 +1,0 @@
-{% macro renderSubMenus(subTitle, subMenus = []) %}
-  <!-- Sub menu -->
-  <h2 class="col-md-12 sub-title" id="subTitle">{{subTitle}}</h2>
-  {% for menuItem in subMenus %}
-    <a role="button" class="list-group-item col-sub-menu {%if loop.first %} selected {% endif %}" id="{{menuItem.id}}" >
-      {{menuItem.name}}
-    </a>
-  {% endfor %}
-{% endmacro %}

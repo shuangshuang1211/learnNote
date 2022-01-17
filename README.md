@@ -1,8 +1,10 @@
 # learnJs
-js学习
+web基础知识点学习note
 
-js_code:
-包含js语法学习代码；
+code:
+- 包含js语法学习代码
+- 一些手写实现
 
-js_note:
-对js基础概念的理解
+note:
+- 对js基础概念的理解
+- 对自己理解的知识点的总结
