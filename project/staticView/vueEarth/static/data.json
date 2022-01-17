@@ -1,0 +1,44 @@
+{
+    "moddata" : [
+             {
+                "name": "EarthTide",
+                "imgPath": "static/img/earthquake/earthtide.png"               
+
+             },
+             {
+                "name": "MagMod IGRF",
+                "imgPath": "static/img/earthquake/magmod.png"                
+
+             },
+             {
+                "name": "GridProc",
+                "imgPath": "static/img/earthquake/gridproc.png"       
+                
+             },
+             {
+                "name": "GraAnomaly",
+                "imgPath": "static/img/earthquake/graanomaly.png"            
+  
+             },
+             {
+                "name": "MagPole",
+                "imgPath": "static/img/earthquake/magpole.png"         
+               
+             },
+             {
+                "name": "DeTrend",
+                "imgPath": "static/img/earthquake/detrend.png"         
+                
+             },
+             {
+                "name": "GMFilter",
+                "imgPath": "static/img/earthquake/gmfilter.png"          
+               
+             },
+             {
+                "name": "GMTrans",
+                "imgPath": "static/img/earthquake/gmtrans.png"         
+                
+             }
+        ]
+}

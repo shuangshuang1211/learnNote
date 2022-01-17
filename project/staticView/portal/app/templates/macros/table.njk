@@ -1,0 +1,29 @@
+{% macro renderTable(tableData, isBuiltInTable = false) %}
+  <!-- Table -->
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        {% for head in tableData.thead %}
+          <th class="table-center table-middle">{{head}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for bodies in tableData.tbody %}
+        <tr>
+          {% for unit in bodies %}
+            <td class="table-middle {%if not isBuiltInTable %} table-center {% endif %}">
+              {%if loop.index === 3 and isBuiltInTable %}
+                {% for builtUnit in unit %}
+                  <p class="main built-table">{{builtUnit.id}}:&emsp;{{builtUnit.content}}</p>
+                {% endfor %}
+              {%else%}
+                {{unit}}
+              {% endif %}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endmacro %}

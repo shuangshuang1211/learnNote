@@ -1,0 +1,29 @@
+{
+    "parameters" : [
+             {
+                "name": "参数1",
+                "value": "4"              
+
+             }
+        ],
+    "optional":[
+    	         {
+    	         	"name":"可选参数1",
+    	         	"value":["1","2","3"]
+    	         },
+    	         {
+    	         	"name":"可选参数2",
+    	         	"value":["value1","value2","value3","value4"]
+    	         }
+                ],
+    "dotted": [
+    	        {
+    	        	"name":"精度",
+    	        	"value":["coarse","middle","actuary"]
+    	        },
+    	        {
+    	        	"name":"新建文档",
+    	        	"value":["是","否"]
+    	        }
+              ]
+}
