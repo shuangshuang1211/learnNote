@@ -9,7 +9,7 @@
 - 概念(设计核心思想)上来说： React是构建用户界面的js库，设计理念是all in Js，推崇**函数式编程(纯组件)，数据不可变以及单向数据流**，Vue 是前端页面应用的渐进式框架，推崇**易用，数据可变，双向数据绑定(依赖收集)**
 - 写法上的差异： Vue建议采用template，虽然后续也支持了jsx，但是官方首推的还是template，基于此，他们之间的api也不相同，vue的**template + options api**(vue3 setup composition)的写法需要理解掌握较多的概念和api，如slot filter指令等，而React只需要简单的hook
 - 从组件实现上也不同： vue把options挂载到Vue核心类上，然后new Vue({options})拿到实例(vue 组件导出的是options的纯对象)，react通过render(类)或通过return jsx直接生成Vnode(掌握更新两者渲染机制)
-- **响应式原理**：，
+- **响应式原理**:
   - vue依赖收集，自动优化，递归监听data的所有属性并修改，当数据改变时自动找到引用组件重新渲染(proxy)
   - react基于状态机，更新组件的state，然后根据新的state重新渲染界面
 - **diff算法**：
@@ -62,7 +62,7 @@ React更关注于底层的实现，上层应用解决方案基本不插手，Vue
     - oldStartVnode / oldEndVnode (旧开始节点 / 新结束节点)
     - oldEndVnode / newStartVnode (旧结束节点 / 新开始节点)
 
-  ![image-20200109184608649](/Users/test/learn/myGitHub/learnJS/note/question/images/image-20200109184608649.png)
+  ![image-20200109184608649](./images/image-20200109184608649.png)
 
   - 开始节点和结束节点比较，这两种情况类似
     - oldStartVnode / newStartVnode (旧开始节点 / 新开始节点)
@@ -71,21 +71,21 @@ React更关注于底层的实现，上层应用解决方案基本不插手，Vue
     - 调用 patchVnode() 对比和更新节点
     - 把旧开始和新开始索引往后移动  oldStartIdx++ / oldEndIdx++
 
-  ![image-20200103121812840](/Users/test/learn/myGitHub/learnJS/note/question/images/image-20200103121812840.png)
+  ![image-20200103121812840](./images/image-20200103121812840.png)
 
    - oldStartVnode / newEndVnode (旧开始节点 / 新结束节点) 相同
      - 调用 patchVnode() 对比和更新节点
      - 把 oldStartVnode 对应的 DOM 元素，移动到右边
        	- 更新索引
 
-  ![image-20200103125428541](/Users/test/learn/myGitHub/learnJS/note/question/images/image-20200103125428541.png)
+  ![image-20200103125428541](./images/image-20200103125428541.png)
 
   - oldEndVnode / newStartVnode (旧结束节点 / 新开始节点) 相同
     - 调用 patchVnode() 对比和更新节点
      - 把 oldEndVnode 对应的 DOM 元素，移动到左边
      - 更新索引
 
-  ![image-20200103125735048](/Users/test/learn/myGitHub/learnJS/note/question/images/image-20200103125735048.png)
+  ![image-20200103125735048](./images/image-20200103125735048.png)
 
   - 如果不是以上四种情况
     - 遍历新节点，使用 newStartNode 的 key 在老节点数组中找相同节点
@@ -97,14 +97,14 @@ React更关注于底层的实现，上层应用解决方案基本不插手，Vue
         - 重新创建对应的 DOM 元素，插入到 DOM 树中
       - 如果相同，把 elmToMove 对应的 DOM 元素，移动到左边
 
-  ![image-20200109184822439](/Users/test/learn/myGitHub/learnJS/note/question/images/image-20200109184822439.png)
+  ![image-20200109184822439](./images/image-20200109184822439.png)
 
   - 循环结束
     - 当老节点的所有子节点先遍历完 (oldStartIdx > oldEndIdx)，循环结束
     - 新节点的所有子节点先遍历完 (newStartIdx > newEndIdx)，循环结束
   - 如果老节点的数组先遍历完(oldStartIdx > oldEndIdx)，说明新节点有剩余，把剩余节点批量插入到右边
 
-  ![image-20200103150918335](/Users/test/learn/myGitHub/learnJS/note/question/images/image-20200103150918335.png)
+  ![image-20200103150918335](./images/image-20200103150918335.png)
 
   ​	
 
