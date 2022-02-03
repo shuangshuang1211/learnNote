@@ -359,7 +359,7 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 - **观察者模式**：
 
-  - 一个被观察者（添加观察者、删除观察者、通知的方法）、多个观察者、通过被观察者主动建立、观察者改变需主动通知观察者
+  - 一个被观察者（添加观察者、删除观察者、通知的方法）、多个观察者、通过被观察者主动建立，被观察者改变需主动通知观察者
 
   - ```js
     // 自己实现观察者模式
@@ -515,9 +515,60 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 - 浅拷贝：针对 Object,Array 这种复杂数据类型，浅拷贝复制一层对象的属性，属性中的值是基本数据类型直接复制值，如果是引用类型复制内存地址的指针，所以在修改复制后的变量里引用类型的里面的值时，会导致原始数据也被修改
   - Object.assign()、Object.create()、扩展运算符、直接赋值、
+  - Object.assign({}, target, source) 与 {...target, ...source}一样
+  - Object.assign会触发target的setter，可能会出现一些副作用
+  
 - 深拷贝：针对 Object,Array 这种复杂数据类型，深复制递归复制了所有的层级，新数据和原始数据不存在联系，因此在修改复制后的变量里引用类型的里面的值时，不会导致原始数据也被修改
   - JSON.parse(JSON.stringify())： 无法正确处理undefined、function、symbol、set、map等类型的值
-  - 迭代递归，分别处理不同类型对应的值
+  
+  - 迭代递归，分别处理不同类型对应的值, [参考](https://github.com/ConardLi/ConardLi.github.io/blob/master/demo/deepClone/src/clone_6.js)
+  
+    ```js
+    function clone(target, mapCahche = new WeakMap()) {
+      // 普通类型的值直接返回
+      if (!(target !== null && typeof target === 'object')) {
+        return target
+      }
+      const type = Object.prototype.toString.call(target)
+      let cloneObject ;
+      if (type is need deep clone) {
+        // 初始化
+        cloneObject = new target.constructor()
+      } else {
+        return cloneOtherType(target, type)
+      }
+      // 防止循坏引用
+      if (mapCahche.get(target)) {
+        return mapCahche.get(target)
+      }
+      mapCahche.set(target, cloneTarget)
+      // map
+      if (type is map) {
+        target.forEach((value, key) => {
+          cloneObject.set(key, clone(value, mpCahche))
+        })
+        return cloneObject
+      }
+      // set
+      if (type is set) {
+        target.forEach((value) => {
+          cloneObject.add(clone(value, mpCahche))
+        })
+        return cloneObject
+      }
+      // object array argsTag
+      const keys = type === arrayType ? target: Obejct.keys(target)
+      let i = 0;
+      while (i < keys.length) {
+        const value = target[keys[i]];
+        cloneObject[i] = clone(value, mapCahche)
+        i++
+      }
+      return cloneObeject
+    }
+    ```
+  
+    
 
 
 
