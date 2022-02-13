@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    img {
+      width: 600px;
+      object-fit: contain;
+    }
+  </style>
+  <title>Service Worder Demo</title>
+</head>
+<body>
+  <h1>Service Worder Demo</h1>
+  <div>
+    <button id="squenceBtn">时序</button>
+    <button id="elementBtn">元素</button>
+  </div>
+  <br>
+  <div>
+    <input id="input" type="text">
+    <button id="sendBtn">send</button>
+    <p id="show"></p>
+  </div>
+
+  <script type="text/javascript">
+    navigator.serviceWorker.register('./js/serviceWorker.js') // 这个是可以有options，设置它的起作用的scope
+      .then(reg => console.log('sw: registered~', reg))
+      .catch(err => console.log('sw: error...'));
+    
+    navigator.serviceWorker.addEventListener('message', function(e) {
+      document.querySelector('#show').innerHTML = e.data;
+    })
+
+    setTimeout(() => {
+      const img = new Image();
+      img.id = 'picture';
+      img.src = '/images/elements.png';
+      document.body.appendChild(img);
+    }, 1000);
+
+    document.querySelector('#squenceBtn').addEventListener('click', function(e) {
+      document.querySelector('#picture').src = '/images/image-20200103121812840.png';
+    });
+    document.querySelector('#elementBtn').addEventListener('click', function(e) {
+      document.querySelector('#picture').src = '/images/elements.png';
+    });
+    document.querySelector('#sendBtn').addEventListener('click', function(e) {
+      const val = document.querySelector('#input').value || '我是空的值';
+      console.log('===>')
+      navigator.serviceWorker.controller.postMessage(val);
+      try {
+        navigator.serviceWorker.controller.postMessage(val);
+      } catch {
+        document.querySelector('#show').innerHTML = 'first time! reflesh';
+      }
+
+    })
+
+  </script>
+</body>
+</html>

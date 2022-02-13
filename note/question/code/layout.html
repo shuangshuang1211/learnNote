@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>圣杯-双飞燕布局</title>
+  <style>
+    body {
+      min-width: 550px;  /* 2x leftContent width + rightContent width */
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    .header, .footer {
+      background: rgba(29, 27, 27, 0.726);
+      text-align: center;
+      height: 60px;
+      line-height: 60px;
+      clear: both;
+    }
+
+    .column {
+      height: 200px;
+      float: left;
+      position: relative;
+    }
+  </style>
+  <style>
+    #sb-container {
+      padding: 0 200px;
+      overflow: hidden;
+    }
+    #sb-left {
+      width: 200px;
+      margin-left: -100%;
+      left: -200px;
+      background-color: aqua;
+    }
+    #sb-right {
+      width: 200px;
+      margin-left: -200px;
+      right: -200px;
+      background-color: wheat;
+    }
+    #sb-center {
+      width: 100%;
+      background-color: tomato;
+    }
+  </style>
+  <style>
+    #sfy-container {
+      overflow: hidden;
+    }
+    #sfy-center {
+      width: 100%;
+    }
+    #sfy-center>#sfy-center-inner{
+      background-color: tomato;
+      margin: 0 200px;
+      height: 100%;
+    }
+    #sfy-left {
+      width: 200px;
+      margin-left: -100%;
+      background-color: aqua;
+    }
+    #sfy-right {
+      width: 200px;
+      margin-left: -200px;
+      background-color: wheat;
+    }
+    .divc {
+      width: 100px;
+    }
+    .div1 {
+      width: 50px;
+      margin: 10%;
+    }
+  </style>
+</head>
+<body>
+  <!-- <div class="divc">
+    <div class="div1">xxx</div>
+  </div> -->
+  <p>圣杯布局</p>
+  <div>
+    <div class="header">#header</div>
+    <div id="sb-container">
+      <div id="sb-center" class="column">#sb-center</div>
+      <div id="sb-left" class="column">#sb-left</div>
+      <div id="sb-right" class="column">#sb-right</div>
+    </div>
+    <div class="footer">#footer</div>
+  </div>
+  <p>双飞燕布局</p>
+  <div>
+    <div class="header">#header</div>
+    <div id="sfy-container">
+      <div id="sfy-center" class="column">
+        <div id="sfy-center-inner">#sfy-center</div>
+      </div>
+      <div id="sfy-left" class="column">#sfy-left</div>
+      <div id="sfy-right" class="column">#sfy-right</div>
+    </div>
+    <div class="footer">#footer</div>
+  </div>
+</body>
+</html>
