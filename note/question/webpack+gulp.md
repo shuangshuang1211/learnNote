@@ -1,7 +1,7 @@
 # webpack
 ### 原理打包？常用的插件
 
-- 怎么提升webpack的打包速度？
+- 怎么提升webpack的打包速度（减少打包体积）？
 
   1. dll 动态库，开发环境下让大的外部依赖模块打包成dll库，这样以后不用每次再打包
 
@@ -11,9 +11,49 @@
 
   4. Splichunks动态加载的模块进行单独打包，懒加载设置，，外部模块 .vendor
 
-  5. CDN
+  5. 接入CDN
 
   6. scope hoisting
+  
+  7. 对于loader，用include和exclude控制需要转义的范围
+  
+  8. 按需加载
+  
+     **require.ensure(dependencies, callback, chunkName)**
+  
+     import
+  
+  9. 按需引入
+  
+  10. Happypack，loader变为多进程
+  
+  11. 用webpack-bundle-analyzer看打包后的模块分析，找出过大的模块 （减少打包体积）
+  
+  12. tree shaking
+  
+  13. webpack4之后，活用[optimization](https://webpack.docschina.org/configuration/optimization/#optimizationchunkids)配置对项目进行自定义优化，虽然它根据mode也可以是自动的
+  
+  6. CompressionWebpackPlugin对资源进行gzip压缩
+
+#### 前端性能工程优化([详情](https://liuliuliu.yuque.com/staff-ihrmb9/ot84gf/sgeu7q#WfnNu))
+
+![img](./images/perfermance.png)
+
+- 图片优化，选择适合的图片格式
+  - Base64、webP
+- 资源构建传输优化
+  - webpack相关的优化(见上述wepack性能优化)
+  - http2
+  - gzip
+- CDN
+- 请求缓存优化
+- 本地缓存优化
+- 浏览器渲染在开发中可优化的点
+- 借助perfermance
+- 通用优化技术
+  - 懒加载预加载
+  - 防抖节流虚拟列表
+  - SSR
 
 
 #### Webpack 的构建流程主要有哪些环节？描述 Webpack 打包的整个过程。

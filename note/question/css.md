@@ -142,4 +142,15 @@ clip
 - jss-nested： &表示选择根样式，$选择自定义的一个样式类名
 - CSS 读取规则？ 从选择器的右边到左边依次读取
 
-新趋势css：shape-outside（定义了一个可以是非矩形的形状，相邻的内联内容应围绕该形状进行包装）
+#### 新的css特性(趋势)
+
+- shape-outside：定义了一个可以是非矩形的形状，相邻的内联内容应围绕该形状进行包装
+- will-change：
+
+#### CSS模块化
+
+为什么？解决全局样式的冲突、方便管理维护代码、模块化的趋势
+
+方法：BEM、css in JS、css moudules
+
+其他：css @mixin和@extends特性？

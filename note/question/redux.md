@@ -104,3 +104,9 @@ fucntion combineReducers (reducers) {
 
 ```
 
+#### redux-thunk 与redux-saga的差异？为什么用saga？
+
+- 处理异步任务的时机不一样，对于thunk，相当于等异步任务执行完之后再调用dispatch，去store调用reducers，saga的流程则是dispatch一个action，如果这个action没在reducers里处理，会用takeEvery监听这个action，调用设置的处理函数，等待异步处理结果，结果返回之后再重新用put发起action改变state，所以saga相当于再redux的基础上，重新开启了单独的async action 的分支；
+- saga有自己的专门的事件监听机制，相比thunk，Saga流程控制都有对应的[api](https://link.juejin.cn/?target=https%3A%2F%2Fredux-saga.js.org%2Fdocs%2Fapi%2F),这些api保证了更简便的流程控制和易于测试等好处(不用再调用promise.then等进行后续处理)，而且有一些现成的take（takeEvery takeLast）等函数封装，可以自动取消一些发起的action
+- ~~**对于redux-thunk的整个流程来说，它是等异步任务执行完成之后，我们再去调用dispatch，然后去store去调用reduces**~~
+

@@ -219,4 +219,19 @@ function commitRoot() {
 }
 ```
 
+#### React Suspense
 
+- 是一种在等待组件渲染前进行其他操作的同时渲染预先准备的内容的机制
+- Suspense的child必须是一个promise，需要promise的状态来触发suspense
+- 一般使用结合lazyload
+- 自己实现的话要对子组件实现专门的wrapped处理，保证不会重复加载
+
+#### React setState同步异步？
+
+- 进入了 `react` 的调度流程，那就是异步的。没有进入 `react` 的调度流程，那就是同步的。`setTimeout` `setInterval` ，直接在 `DOM` 上绑定原生事件等都不会走React的调度流程，就是同步，其他的都是异步
+
+  `调用 `setState` 其实是异步的 —— 不要指望在调用 `setState` 之后，`this.state` 会立即映射为新的值`
+
+  `事件处理函数内部的setState是异步的，如果 Parent 和 Child 在同一个 click 事件中都调用了 setState ，这样就可以确保 Child 不会被重新渲染两次`
+
+- scheduleUpdateOnFiber

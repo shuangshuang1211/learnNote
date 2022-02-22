@@ -460,9 +460,11 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 
 ### Promise 手动实现、考题
-- 具体 code 实现在interviewCode/promise.js
+- 具体 code 实现在 ../ownCode/promise.js
 
 - then catch finally, 静态方法：resolve reject all race any allSettled 
+
+- promsie前面的链式调用中如果抛出了throw error，可以被后续catch调用捕获
 
 - ```js
   // 传入的是一个函数带resolve reject 回调，构造函数执行constructor期间就执行此参数，如果出错就直接reject
@@ -507,7 +509,7 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 ### 节流防抖实现
 
-- interviewCode/try2Do.js debounce
+- ownCode/try2Do.js debounce 或 code/jsLoadedOrder/debounce.html
 
 ###  什么是浅拷贝，什么是深拷贝？
 
@@ -693,4 +695,58 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
          }
 
 21. 有哪些设计模式？工厂模式、迭代模式、原型模式、代理模式(用途？涉及到Reflect api，四版第九章)
+
+22. 20220217 pm
+
+    - z-index什么情况下失效
+
+      `z-index` 属性设定了一个定位元素及其后代元素或 flex 项目的 z-order
+
+    - 0.1 + 0.2为什么不等于0.3
+
+    - 作用域链闭包this的指向，箭头函数的this
+
+    - null和undefined的区别
+
+    - 有哪些基本数据类型（七种），null是基本数据类型嘛？yes，typeof null = ‘object’
+
+      **null是一个表示"无"的对象，转为数值时为0；undefined是一个表示"无"的原始值，转为数值时为NaN。**
+
+    - instanceof实现
+
+    - Proxy用在React哪些地方
+
+    - React怎么减少渲染，也是优化性能吧
+
+    - setState更新机制，setTimeOut中设置setTate后能拿到新的值吗？
+
+    - 异步的实现方式
+
+    - 强缓存和协商缓存
+
+    - curry以及应用
+
+    - redux原理
+
+    - BFC、回流重绘
+
+    - 怎么查找内存泄漏
+
+    - 手写promise
+
+23. 20220222 am
+
+    - 什么是闭包？事件循环
+    - 对promise的理解，throw error的代码会被catch吗？yes，throw error与reject有什么区别
+    - 迭代器相关，怎么实现迭代器
+    - 为什么要进行长链接？什么是长链接
+    - React的setState是同步还是异步
+    - 合成事件，什么是事件捕获和冒泡
+    - saga相比于redux-thunk的优劣势
+    - BFC和块元素和内联元素的区别
+    - useMemo和useCallback的区别
+    - ts的问题，type和interface的区别，type定义的数据可以实现继承吗
+    - ts相比于js特有的数据类型
+    - createReducers
+    - createRef的使用
 
