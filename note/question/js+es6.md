@@ -285,6 +285,11 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 ### 函数式编程、高阶函数、函数柯里化
 
+- 函数所有参数是按值传入的，原始值传入函数不影响外部值，对象按值传入函数(把对象作为参数传递，那么传递的值就是这个对象的引用)，但以引用的方式来访问这个传入的对象（函数的参数就是局部变量）
+
+  - 默认参数：传入undefined相当于不传会使用默认参数,后定义默认值的参数可以引用先定义的参数,前面定义的参数不能引用后面的
+  - arguments : (callee指向arguments所在函数的指针)
+  
 - 函数式编程： 对数据映射关系的描述，方便代码的重用，函数可作为变量参数和返回值
 
   - 纯函数： 传入相同的值返回相同，返回值只由传入值决定，且没有副作用
@@ -572,13 +577,224 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
   
     
 
+### for...of... for...in 区别
 
+- **for in**：遍历对象的可枚举的非Symbol的属性(key)
+
+- **for of**：可迭代的数据值，就是具有 Symbol.iterator方法的对象，[可迭代对象](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Iteration_protocols)（包括 [`Array`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array)，[`Map`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Map)，[`Set`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Set)，[`String`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String)，[`TypedArray`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/TypedArray)，[arguments](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions_and_function_scope/arguments) 对象等等）
+
+  ```js
+  /
+  * 用for of实现对一个对象的遍历
+  *
+  /
+  const range = {
+    from: 1,
+    to: 5
+  }
+  range[Symbol.iterator] = function * () {
+    let i = range.from
+    while (i <= range.to) {
+      yield i
+      i++
+    }
+  }
+  //也可以用以下方式实现
+  range[Symbol.iterator] = function() {
+    let start = range.from
+    return {
+      next: () => {
+        if (start <= range.to) {
+          start ++
+          return {value: start - 1, done: false}
+        } else {
+          return {value: start, done: true}
+        }
+      }
+    }
+  }
+  for (let num of range) {
+    console.log(num) // 希望输出num = 1,2,3,4,5
+  }
+  ```
+
+### Symbol
+
+- 使用这样的形式最多 `const id = Symbol.for('id')`，全局使用
+- 还有就是内置的Symbol.iterator
+- 每个从Symbol()返回的symbol值都是唯一的，一个symbol值能作为对象属性的标识符
+
+### Generator对象  yield   function*
+
+- [迭代器协议](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Iteration_protocols#iterator)（具有next 方法）和 可迭代协议（[Symbol.terator]方法）
+
+- function*： 定义一个**生成器函数**，返回一个**`Generator对象`**（生成器的迭代器对象，符合可迭代协议和迭代器协议）
+
+- 迭代器对象有一个next方法，这个方法返回一个`{value: /* yield后的值*/, done: 生成器后续是否还有 yield 语句}`
+
+- 首次调用next方法时会执行到首次yield出现的位置为止，next方法传入的参数会赋给上一次yield 左边的变量
+
+- `yield` 关键字用来暂停和恢复一个生成器函数
+
+- 自动运行Generator对象函数
+
+  ```js
+  function autoRunGen (genObj, res = []) {
+    let currValue, len = res.length
+    if (len > 0 ) {
+      currValue = genObj.next(res[len - 1].value)
+    } else {
+      currValue = genObj.next()
+    }
+    res.push(currValue)
+    if (currValue.done) {
+      return res
+    } else {
+      return autoRunGen(genObj, res)
+    }
+  }
+  ```
+
+- 利用迭代器实现展开多维数组
+
+  ```js
+  function* iterArr(arr) {            //迭代器返回一个迭代器对象
+    if (Array.isArray(arr)) {         // 内节点
+        for(let i=0; i < arr.length; i++) {
+            yield* iterArr(arr[i]);   // (*)递归
+        }
+    } else {                          // 离开
+        yield arr;
+    }
+  }
+  // 或者直接将迭代器展开:
+  var arr = [ 'a', ['b',[ 'c', ['d', 'e']]]];
+  var gen = iterArr(arr);
+  arr = [...gen];
+  ```
+
+  
+
+### Map WeakMap Set WeakSet
+
+- Map
+
+  - `const mapData = new Map(); mapData.set(key, value)`, key 可以是任何值
+
+  - NaN作为key，NaN 是与 `NaN` 相等的（虽然 `NaN !== NaN`） +0 与 -0 相等
+
+  - mapData.size 返回长度，mapData.get(key)
+
+  - ```js
+    const myMap = new Map();
+    myMap.set(0, '000');
+    myMap.set(1, '001');
+    myMap.set(NaN, 'not a number');
+    for (let [key, value] of myMap) {
+      console.log('key = ', key, 'value = ', value) // key =  0 value =  000; key =  1 value =  001 ...
+    }
+    console.log(myMap.size, myMap.has(NaN))  // 3 true
+    for (let key of myMap.keys()) {
+      console.log('key = ', key) // key =  0 ; key =  1 ...
+    }
+    for (let value of myMap.values()) {
+      console.log('value = ', value) // value =  000; value =  001..
+    }
+    
+    let kvArray = [["key1", "value1"], ["key2", "value2"]];
+    
+    // 使用常规的Map构造函数可以将一个二维键值对数组转换成一个Map对象
+    let myMap = new Map(kvArray);
+    
+    myMap.get("key1"); // 返回值为 "value1"
+    
+    // 使用Array.from函数可以将一个Map对象转换成一个二维键值对数组
+    console.log(Array.from(myMap)); // 输出和kvArray相同的数组
+    
+    // 更简洁的方法来做如上同样的事情，使用展开运算符
+    console.log([...myMap]);
+    
+    // 或者在键或者值的迭代器上使用Array.from，进而得到只含有键或者值的数组
+    console.log(Array.from(myMap.keys())); // 输出 ["key1", "key2"]
+    ```
+
+  - WeakMap: 键是弱引用对象(在没有其他引用存在时垃圾回收能正确进行，不可枚举)，其键必须是对象, 而值可以是任意, **`WeakMap` 的 key 是不可枚举的**
+
+- Set: 对象允许存储任何类型的唯一值（NaN +0与Map一样）
+
+  - `WeakSet` 只能是**对象的集合**，而不能是任何类型的任意值
+
+### Proxy 和 Reflect
+
+- **proxy**：用于创建一个对象的代理，实现基本操作的拦截和自定义
+
+  - handler.get: (target, prop, receiver), 可返回任意值，receiver一般是proxy对象，也有可能是
+
+  - hadnler.set: (target, prop, newValue, receiver), 返回true才代表属性设置成功，receiver最初被调用的对象，通常是 proxy 本身，但 handler 的 set 方法也有可能在原型链上，或以其他方式被间接地调用（因此不一定是 proxy 本身）
+
+  - 实现array[-2]调用
+
+    ```js
+    const proxyArr = (data) => {
+      return new Proxy(data, {
+        get: (target, prop, receiver) => {
+          prop = +prop
+          if (prop <= -target.length) {
+            console.log('over limit')
+            return
+          } 
+          if (prop < 0) {
+            prop = prop + target.length
+          }
+          console.log(target, prop, receiver, target.length)
+          return Reflect.get(data, prop, receiver)
+        }
+      })
+    }
+    ```
+
+    
+
+- **reflect**： 内置对象，有与proxy handler相同的静态方法，不能用new来调用，
+
+  - 有时用reflect取值，确保了当一个代理对象是另一个实例的原型对象时，通过这个实例调用getter函数时有正确的this指向
+
+- 一个相关栗子
+
+```js
+let user = {
+  _name: "Guest",
+  get name() {
+    console.log('this', this) // 这里this的指向不一定只指向user
+    return this._name;
+  }
+};
+
+let userProxy = new Proxy(user, {
+  get(target, prop, receiver) {
+    // console.log('receiver', receiver)
+    return Reflect.get(target, prop, receiver); // this指向admin
+    // return target[prop]; // this指向user
+  }
+});
+
+let admin = {
+  __proto__: userProxy,
+  _name: "Admin"
+};
+
+console.log('userProxy.name: ', userProxy.name);
+console.log('admin.name: ', admin.name);
+```
 
 
 
 1. 排序算法(至少三种)*
+
 2. 数组去重
+
 3. Mixins 和 高阶函数 、Hook
+
 4. sum(1) sum(1)(2)(3)(4) sum(1, 2, 3, 4);
 
 9. 进程与线程？
@@ -600,10 +816,6 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
      GUI界面渲染
 
      js引擎执行线程，主线程
-
-11. 对Symbol的理解？(是什么，属性方法，用途)
-          https://juejin.cn/post/6925619440843227143
-         每个从Symbol()返回的symbol值都是唯一的，一个symbol值能作为对象属性的标识符 —— 这是该数据类型仅有的目的
 
 12. super方法的理解？super关键字用于访问和调用一个对象的父对象上的函数,
          super 关键字使用的注意几个问题：
@@ -645,7 +857,7 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
       resolve()后续的代码也会执行
 
-     then中的回调函数执行不报错范湖都是fulfilled的promise，如果返回的是promise，就是这个返回promise的状态
+     then中的回调函数执行不报错返回的是fulfilled的promise，如果返回的是promise，就是这个返回promise的状态
 
 16. Async
 
@@ -654,49 +866,13 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
      - await一般配合async使用，后面放的是promsie的实例，如果不是则会转为promise的实例
      - await foo() ，此时foo函数会被立即调用，且foo的返回值可以被处理成promise值，await 后面的代码相当于then
 
-17. 函数 : 函数所有参数是按值传入的，原始值传入函数不影响外部值，对象按值传入函数(把对象作为参数传       递，那么传递的值就是这个对象的引用)，但以引用的方式来访问这个传入的对象（函数的参数就是局部变量）
-       默认参数：传入undefined相当于不传会使用默认参数,后定义默认值的参数可以引用先定义的参数,前面定义的参数不能引用后面定义
-       函数内部存在的对象：
-       arguments : (callee指向arguments所在函数的指针)
-
-
-
-18. Date RegExp 等创建的实例都有 toLocalString() toString() valueof() 等方法；
+17. Date RegExp 等创建的实例都有 toLocalString() toString() valueof() 等方法；
         原始值包装类型：
         Boolean
         Number
         String =>（slice()、substr(子字符串截取的开始位置index， 截取子字符串的长度)和 substring()）
 
-19. yield 生成器， Generator 函数赋值时不会执行函数内部内容，第一次调用的next内不需要参数，输入的参数也会忽略，随后输入的next参数是执行下一个yield相关代买需要的输入或输出,每一个yield执行完就停止，等待下一次next的调用再执行yield，执行next()后返回结果中的res.value是yield 表达式或return的返回；
-        自定义生成器自动执行函数
-        function runGen (gen, arr = []) {
-          let res;
-          if (arr.length > 0) {
-        res = gen.next(arr[arr.length - 1].value);
-          } else {
-        res = gen.next();
-          }
-          arr.push(res);
-          if (!res.done) {
-        return runGen(gen, arr);
-          } else {
-        return arr;
-          }
-        }
-
-20. 实现默认迭代器(生成器生成默认迭代器)
-         class Foo {
-        constructor() {
-          this.values = [1, 2, 3];
-        }
-        *[[Symbol.iterator]]() {
-          yield*  this.values;
-        }
-         }
-
-21. 有哪些设计模式？工厂模式、迭代模式、原型模式、代理模式(用途？涉及到Reflect api，四版第九章)
-
-22. 20220217 pm
+18. 20220217 pm
 
     - z-index什么情况下失效
 
@@ -734,7 +910,7 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
     - 手写promise
 
-23. 20220222 am
+19. 20220222 am
 
     - 什么是闭包？事件循环
     - 对promise的理解，throw error的代码会被catch吗？yes，throw error与reject有什么区别
@@ -747,6 +923,6 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
     - useMemo和useCallback的区别
     - ts的问题，type和interface的区别，type定义的数据可以实现继承吗
     - ts相比于js特有的数据类型
-    - createReducers
-    - createRef的使用
+    - useReducers
+    - useRef的使用
 

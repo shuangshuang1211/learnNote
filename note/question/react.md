@@ -2,11 +2,13 @@
 
 
 
-1. React的优势是什么？
+#### React的优势是什么？
 
-     React是一个js库,  一切皆是组件，声明式范式可以轻松描述应用，让业务逻辑与DOM操作进行很好的分离
+React是一个js库,  一切皆是组件，声明式范式可以轻松描述应用，让业务逻辑与DOM操作进行很好的分离
 
-     为什么选择JSX？模板分散了技术栈和关注点，模板也引入了其他的概念(模板的语法)
+为什么选择JSX？模板分散了技术栈和关注点，模板也引入了其他的概念(模板的语法)
+
+
 
 ## VirtualDOM 和 Diff 算法
 
@@ -32,18 +34,6 @@
   - 第一次遍历 effects list（commitBeforeMutationEffects）：在更改前读取 DOM 上的 state，这里是 getSnapshotBeforeUpdate [生命周期](https://www.zhihu.com/search?q=生命周期&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"article"%2C"sourceId"%3A103506207})调用的地方；
   - 第二次遍历 effects list（commitMutationEffects）：此阶段是真正更改 DOM 的阶段；
   - 第三次遍历 effects list（commitLayoutEffects）：执行[生命周期函数](https://www.zhihu.com/search?q=生命周期函数&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"article"%2C"sourceId"%3A103506207}) componentDidMount（首次渲染）、componentDidUpdate(更新阶段).
-
-1. 函数组件和类组件的区别？
-2. 组件间的数据传递？
-3. 组件优化？
-4. key 的作用？key为什么最好不要用index？
-5. 受控组件？非受控组件
-6. useCallback 与 useMemo 有什么不一样？useEffect传入[]的时候为什么只执行一次？
-7. React性能优化？ React.lazy原理
-     懒加载？ https://juejin.cn/post/6844904191853494280
-8. React Router 的实现原理?
-9. React 事件委托
-10. 怎么实现一个自定义hook？
 
 ------
 
@@ -219,6 +209,10 @@ function commitRoot() {
 }
 ```
 
+
+
+## 知识点
+
 #### React Suspense
 
 - 是一种在等待组件渲染前进行其他操作的同时渲染预先准备的内容的机制
@@ -235,3 +229,249 @@ function commitRoot() {
   `事件处理函数内部的setState是异步的，如果 Parent 和 Child 在同一个 click 事件中都调用了 setState ，这样就可以确保 Child 不会被重新渲染两次`
 
 - scheduleUpdateOnFiber
+
+#### React 合成事件
+
+- `SyntheticEvent` 实例将被传递给事件处理函数，它是浏览器的原生事件的跨浏览器包装器
+- stopPropagation和preventDefault
+
+#### 事件冒泡和捕获
+
+- 定义： 是一种机制，主要描述当在同一个元素上定义了多个同类型事件处理器被激活时怎么处理，也是解决页面事件流的问题的关键点
+- 当一个事件发生在具有父元素的元素上，现代浏览器具有的两个阶段：捕获阶段和冒泡阶段
+  - 为什么要用两个阶段？早起浏览器兼容性差，一些只支持事件捕获，一些只支持IE的冒泡，W3C为了整合这两者
+  - 捕获阶段：浏览器检查目标元素的最外层祖先元素html，看此时是否注册了相同的事件处理程序，有则执行，接着再检查html内目标元素的下一个祖先元素，执行相同的操作，直到到达目标元素
+  - 冒泡阶段：浏览器检查目标元素是否注册了该事件，是并执行，再检测目标的下一个直接祖先元素是否有同类事件，层层传递直到html元素
+  - 现代浏览器默认情况下所有事件处理程序是在冒泡阶段注册，可以通过事件对象的stopPropagation来阻止冒泡
+  - 冒泡还可以进行**事件委托**，当需要对大量的子组件进行事件监听执行一段代码的时候，可以将事件监听器设置在其父节点上，并让子节点上发生的事件冒泡到父节点上，而不是每个子节点单独设置事件监听器
+
+#### useCallback 与 useMemo 区别
+
+- useCallback：缓存的回调函数， 针对可能重新创建的函数进行优化，使得函数被缓存，React.memo 认定两次地址是相同就可以避免子组件冗余的更新。
+- useMemo： 针对不必要的计算进行优化，避免了当前组件中一些的冗余计算操作
+- useEffect传入[]为什么只更新一次？
+  - 默认情况下，useEffect在第一次渲染之后*和*每次更新之后都会执行
+
+#### useReducer
+
+- 管理组件的内部复杂的state
+
+```js
+const useReducer = (reducer, initState) => {
+  const [state, setSate] = useState(initState)
+  function dispatch (action) {
+    setState((preState) => reducer(preState, action))
+  }
+  return [state, dispatch]
+}
+```
+
+#### refs、useRef
+
+- **refs**：
+  - ref 对象是一个 `current` 属性可变且可以容纳任意值的通用容器，类似于一个 class 的实例属性，提供一种访问DOM节点(或在render中创建的React元素)的方式，适用于：
+    - 管理焦点，文本选择或媒体播放。
+    - 触发强制动画。
+    - 集成第三方 DOM 库。
+  - 修改时机： 通常应该在**事件处理器和 effects** 中修改 refs
+
+- **useRef**：
+
+  - 返回一个可变的ref对象，初始 .current 就是传入的初始值
+
+    `const refContainer = useRef(initialValue);`
+
+  - 用于DOM ref，可以命令式的访问子组件，如`myRef.current.focus();`
+
+  
+
+#### 实现一个自定义hook
+
+- 定义： 将共享的逻辑提取出来单独组成一个函数，本质是把react提供本身的hook进行组合
+
+- ```js
+  const useStep = (currStep, error) => {
+    const [isActive, setActive] = useState(false);
+    useEffect(() => {
+      if (currStep === 'xxx' || error) {
+        setActive(true)
+      }
+    }, [currStep, error])
+    return isActive
+  }
+  ```
+
+#### 高阶组件
+
+- **高阶组件是参数为组件，返回值为新组件的函数**，复用组件逻辑的一种高级技巧， HOC 解决横切关注点
+- HOC 是纯函数，没有副作用
+- 不要再render方法中运用HOC，这不仅仅是性能问题 - 重新挂载组件会导致该组件及其所有子组件的状态丢失
+- refs不会被传递，`ref` 实际上并不是一个 prop - 就像 `key` 一样
+
+```js
+function logProps(WrappedComponent) {
+  class LogProps extends React.Component {
+    componentDidUpdate(prevProps) {
+      console.log('old props:', prevProps);
+      console.log('new props:', this.props);
+    }
+
+    render() {
+      return <WrappedComponent {...this.props} />;
+    }
+  }
+  return LogProps;
+}
+// 外部传入 的ref不会被传入到WrappedComponent组件，而是会被传到LogProps
+
+// 此函数接收一个组件...
+function withSubscription(WrappedComponent, selectData) {
+  // ...并返回另一个组件...
+  return class extends React.Component {
+    constructor(props) {
+      super(props);
+      this.handleChange = this.handleChange.bind(this);
+      this.state = {
+        data: selectData(DataSource, props)
+      };
+    }
+
+    componentDidMount() {
+      // ...负责订阅相关的操作...
+      DataSource.addChangeListener(this.handleChange);
+    }
+
+    componentWillUnmount() {
+      DataSource.removeChangeListener(this.handleChange);
+    }
+
+    handleChange() {
+      this.setState({
+        data: selectData(DataSource, this.props)
+      });
+    }
+
+    render() {
+      // ... 并使用新数据渲染被包装的组件!
+      // 请注意，我们可能还会传递其他属性
+      return <WrappedComponent data={this.state.data} {...this.props} />;
+    }
+  };
+}
+```
+
+#### 组件的通信/数据传递
+
+- 典型数据流： props 父传子
+
+- store数据
+
+- 传入函数，通过函数的参数子传父
+
+- **Context**：
+
+  - 主题或首选语言等场景
+
+  - Context 主要应用场景在于*很多*不同层级的组件需要访问同样一些的数据(locale\theme或缓存数据)。请谨慎使用，因为这会使得组件的复用性变差。
+
+  - 手写一个Context
+
+    ```js
+    const ThemeContext = React.createContext('light');
+    const App = () => {
+      return (
+        <ThemeContext.Provider value={}>
+          <ParentComponent />
+        </ThemeContext.Provider>
+      );
+    }
+    const ParentComponent = (props) => {
+      return (
+        <ThemeButtonComponent />
+      )
+    }
+    const ThemeButtonComponent = () => {
+      const theme = useContext(ThemeContext)
+      return (
+        <Button onClick={}>
+        	{theme}
+        </Button>
+      )
+    }
+    ```
+
+  - 实现原理：
+
+#### React Router 的实现原理
+
+- 为什么需要？单页应用spa页面的出现，只有一个html文件，下载所有css js文件，所有页面都在一个容器下，页面的切换本质是组件的切换，实现原理就是切换url，监听url变化，从而实现页面组件的变化
+
+- react-router-dom、react-router、history
+
+- history
+
+  - history模式，通过监听popstate事件，改变路由：window.history.pushState(state,title,path)、history.replaceState
+
+    `调用`history.pushState()`或`history.replaceState()`不会触发`popstate`事件。只有在做出浏览器动作时，才会触发该事件，如用户点击浏览器的回退按钮（或者在Javascript代码中调用`history.back()`或者`history.forward()`方法）`
+
+  - hash模式，通过监听hashchange事件，改变路由：**window.location.hash**
+
+  - 原理：createBrowserHistory： setState、push、handlePopState
+
+    history.push流程：**首先生成一个最新的`location`对象，然后通过`window.history.pushState`方法改变浏览器当前路由(即当前的path),最后通过`setState`方法通知`React-Router`更新，并传递当前的location对象，由于这次url变化的，是`history.pushState`产生的，并不会触发`popState`方法，所以需要手动`setState`，触发组件更新**。
+
+    在`hash`模式下 ，`history.push` 底层是调用了 `window.location.href`来改变路由。`history.replace`底层是掉用 `window.location.replace`改变路由。
+
+    ```js
+    const PopStateEvent = 'popstate'
+    const HashChangeEvent = 'hashchange'
+    /* 这里简化了createBrowserHistory，列出了几个核心api及其作用 */
+    function createBrowserHistory(){
+        /* 全局history  */
+        const globalHistory = window.history
+        /* 处理路由转换，记录了listens信息。 */
+        const transitionManager = createTransitionManager()
+        /* 改变location对象，通知组件更新 */
+        const setState = () => { /* ... */ }
+        
+        /* 处理当path改变后，处理popstate变化的回调函数 */
+        const handlePopState = () => { /* ... */ }
+       
+        /* history.push方法，改变路由，通过全局对象history.pushState改变url, 通知router触发更新，替换组件 */
+        const push=() => { /*...*/ }
+        
+        /* 底层应用事件监听器，监听popstate事件 */
+        const listen=()=>{ /*...*/ } 
+        return {
+           push,
+           listen,
+           /* .... */ 
+        }
+    }
+    ```
+
+  - **Router**：接受通知，派发更新流，把更新的location history传递下去，借助React.Context，RouterContext.Provider
+  - **Switch** 匹配正确的唯一路由，RouterContext.Consumer，遍历每个子组件的path或者redirect的form匹配正确的组件
+  - **Route** 页面承载容器，通过RouterContext.Consumer 取出上一级的`location,match`等传递给页面组建
+  - **Redirect** 没匹配的路由就重定向到此路由
+
+  [参考](https://juejin.cn/post/6886290490640039943#heading-18)
+
+#### 受控组件、非受控组件
+
+- 受控组件：是针对html中有自己state并根据用户输入来更新的表单元素而言(<input /> <textarea /> <select />)
+- 让React组件本身的state成为唯一数据源，让渲染表单的React组件控制用户输入过程发生的操作和更新，被React以这种方式控制值的表单输入元素叫受控组件
+- 非受控组件： 表单数据将交由 DOM 节点来处理，<input type="file" />始终是一个非受控组件，借助ref Dom
+
+#### React性能优化
+
+- React.lazy
+- 合理运用shouldComponentUpdate 和pureComponent 以及React.memo
+- 不要再render方法中运用HOC，这不仅仅是性能问题 - 重新挂载组件会导致该组件及其所有子组件的状态丢失
+
+
+
+
+
+1. 函数组件和类组件的区别？
+2. key 的作用？key为什么最好不要用index？
