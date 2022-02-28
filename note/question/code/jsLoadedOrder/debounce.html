@@ -122,12 +122,11 @@
         const interval = time - (nowTime - prevCallTime);
         console.log('interval', interval);
         timer = setTimeout(() => {
-
           handleFn(...args);
           clearTimeout(timer);
           timer = null;
           prevCallTime = Date.now();
-        }, [interval]);
+        }, interval);
       } else if (prevCallTime + time <= nowTime) {
 
         handleFn(...args);

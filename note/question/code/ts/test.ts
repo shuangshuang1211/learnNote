@@ -77,3 +77,10 @@ class Usera implements User {
 
   }
 }
+
+const data = {
+  age: 0
+}
+
+console.log('?? = ', data.age ?? 'defaultValue')
+console.log('|| = ', data.age || 'defaultValue')

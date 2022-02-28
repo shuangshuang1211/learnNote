@@ -402,11 +402,10 @@ class MyPromise {
   static resolve (value) {
     if (value instanceof MyPromise) {
       return value;
-    } else {
-      return new MyPromise((res) => {
-        res(value);
-      })
     }
+    return new MyPromise((res) => {
+      res(value);
+    })
   }
 
   // 传入一个值返回一个reject的promise
@@ -490,7 +489,7 @@ class MyPromise {
         }
         res[index] = obj;
         key ++;
-        if (key === res.length) {
+        if (key === arr.length) {
           resolve(res);
         }
       };
@@ -536,7 +535,7 @@ class MyPromise {
           }
         }
       } else if (!arr) {
-        resolve();
+        reject();
       } else {
         console.error('arr must be iterable data');
       }
