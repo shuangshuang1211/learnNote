@@ -10,6 +10,15 @@ React是一个js库,  一切皆是组件，声明式范式可以轻松描述应�
 
 
 
+## CreateElement
+
+- jsx组件(babel转化)最后执行的是createElement的调用
+- 参数(type, config, children)
+- 分离普通属性和特殊属性( key \ ref \ __ self \ __ source )
+- 把子元素挂在到props上
+- 处理props的defaultProps
+- 返回ReactElement
+
 ## VirtualDOM 和 Diff 算法
 
 - virtualDom(babel只是把jsx转成React.createElement的调用,虚拟DOM是createElement的返回值)是真实DOM的一个副本，是描述真实DOM的js对象，包含type：html标签名，props： 元素的属性，children： 元素的子元素等
@@ -26,14 +35,20 @@ React是一个js库,  一切皆是组件，声明式范式可以轻松描述应�
 
 ##  React 中初始渲染的流程
 
-- 执行React.render, 清除根节点下的所有子元素, 创建 ReactRoot,开始创建FiberRoot
-- enqueueUpdate 将当前更新压入队列，后执行scheduleUpdateOnFiber
-- workLoop, 循环更新，没更新一个Fiber节点就判断下是否有更优先级的任务要执行
-- 执行performUnitOfWork，beginWork,开始为节点构建stateNode(真实DOM),构建Fiber树，深度优先遍历，构建当前Fiber节点的子级FIber，确立子级fiber的同级fiber关系(sibling: 下一个兄弟节点,return： workInProgress),第一个子节点是workInProggress节点的子级。当前节点有子级返回子级重复上述步骤，当workInProgress没有子节点，开始构建的向上阶段，并开始构建Fiber链表。当前workInprogress存在(while)，则执行compeleteUnitofWork构建Fiber链表，用当前Fiber的父Fiber保存firstEffect和lastEffect，当前Fiber的first和last先赋给父Fiber，有EffectTag则进行链表lastEffect.nextEffect的赋值，并把父FIber的lastEffect指向当前Fiber，执行完成后，有同级则返回同级执行performUnitOfWork，没有同级workInProgress 则指向父级，找父级的同级执行completeUnitOfWork
+- 执行React.render( element \ container \ call?), 清除根节点下的所有子元素, 创建 ReactRoot,开始创建FiberRoot(current fiber树中的Fiber对象， `root._internalRoot`) 和 rootFiber（id为root对应的div所对应的对象），`FiberRoot.current = rootFiber;rootFiber.statNode = FiberRoot`, 然后为 fiber 对象添加 updateQueue 属性，**初始化渲染**执行unbatchedUpdates方法(为什么不是批量更新？每次想一下)调用 render 方法返回的是render第一个参数的真实 DOM 对象
+
+- unbatchedUpdates实际执行的就是(updateContainer) enqueueUpdate 将当前更新压入队列，后执行scheduleUpdateOnFiber,构建workInProgress
+
+  **`updateQueue.shared.pending 就是待执行的任务，首次渲染就是null，会把初始更新的任务挂在到这里`**
+
+- workLoopSync, 循环更新，每更新一个Fiber节点就判断下是否有更优先级的任务要执行
+
+- 执行performUnitOfWork，beginWork（从父到子构建）,构建Fiber树，深度优先遍历，构建当前Fiber节点的子级FIber，确立子级fiber的同级fiber关系(sibling: 下一个兄弟节点,return： 父Fiber),第一个子节点是workInProggress节点的子级。当前节点有子级返回子级重复上述步骤，当workInProgress没有子节点，开始构建的向上阶段，并开始构建Fiber链表。当前workInprogress存在(while)，则执行compeleteUnitofWork构建Fiber链表(并为每个节点构建stateNode(真实DOM))，用当前Fiber的父Fiber保存firstEffect和lastEffect，当前Fiber的first和last先赋给父Fiber，有EffectTag则进行链表lastEffect.nextEffect的赋值，并把父FIber的lastEffect指向当前Fiber，执行完成后，有同级则返回同级执行performUnitOfWork，没有同级workInProgress 则指向父级，找父级的同级执行completeUnitOfWork
+
 - 以上整个过程完成，则进行commitRoot阶段，这个阶段不能中断，遍历Fiber链表，从firstFiber开始挂载DOm
-  - 第一次遍历 effects list（commitBeforeMutationEffects）：在更改前读取 DOM 上的 state，这里是 getSnapshotBeforeUpdate [生命周期](https://www.zhihu.com/search?q=生命周期&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"article"%2C"sourceId"%3A103506207})调用的地方；
+  - 第一次遍历 effects list（commitBeforeMutationEffects）：在更改前读取 DOM 上的 state，这里是 getSnapshotBeforeUpdate [生命周期](https://www.zhihu.com/search?q=生命周期&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"article"%2C"sourceId"%3A103506207})（此函数只在更新阶段调用首次渲染不会执行）调用的地方；
   - 第二次遍历 effects list（commitMutationEffects）：此阶段是真正更改 DOM 的阶段；
-  - 第三次遍历 effects list（commitLayoutEffects）：执行[生命周期函数](https://www.zhihu.com/search?q=生命周期函数&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"article"%2C"sourceId"%3A103506207}) componentDidMount（首次渲染）、componentDidUpdate(更新阶段).
+  - 第三次遍历 effects list（commitLayoutEffects）：执行[生命周期函数](https://www.zhihu.com/search?q=生命周期函数&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"article"%2C"sourceId"%3A103506207}) 和 函数组件的Effect钩子 等 componentDidMount（首次渲染）、componentDidUpdate(更新阶段).
 
 ------
 
@@ -69,6 +84,16 @@ React是一个js库,  一切皆是组件，声明式范式可以轻松描述应�
   ```
 
 #### Fiber工作方式？
+
+- Fiber架构分为三层：
+
+  - Scheduler：实现浏览器空闲时执行任务，可以设置任务的优先级
+
+  - Reconclier：构建Fiber节点，找出 节点差异部分，并打上标记
+
+  - Render：根据标记同步执行对应的DOM操作
+
+    ![scheduler_reconclier_render](./images/scheduler_reconclier_render.png)
 
 - render阶段：构建 Fiber 对象，构建链表，在链表中标记要执行的 DOM 操作 ，可中断。
   - 深度遍历优先，从上向下走，构建节点对应的 Fiber 对象，然后再从下向上走，构建 Fiber 对象及链表。
@@ -145,7 +170,7 @@ function beginWork(workInProgress) {
   // 当前Fiber没有statNode则创建DOm节点
   if (!workInProgress.stateNode) {
     workInProgress.stateNode = document.createElement(workInProgress.type);
-    for (let attr of props) {
+    for (let attr in workInProgressFiber.props) {
       if (attr !== 'children') {
         workInProgress.stateNode[attr] = props[attr]
       }
@@ -228,7 +253,7 @@ function commitRoot() {
 
   `事件处理函数内部的setState是异步的，如果 Parent 和 Child 在同一个 click 事件中都调用了 setState ，这样就可以确保 Child 不会被重新渲染两次`
 
-- scheduleUpdateOnFiber
+- scheduleUpdateOnFiber： 在这个函数中executionContext === NoContext则就是要同步更新
 
 #### React 合成事件
 

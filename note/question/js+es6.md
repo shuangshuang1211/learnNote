@@ -171,7 +171,16 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 ### 闭包、函数作用域和块、作用域链
 
-- js执行会时会开辟一块内存作为执行环境，来规定执行期间允许获取到的所有信息(EC\ECG)，这些信息都被保存在变量对象中(VOG(window)\AO),全局执行环境是最外层的执行环境
+- js执行会时会开辟一块内存作为执行环境(执行栈/调用栈)，来规定执行期间允许获取到的所有信息(EC\ECG)，这些信息都被保存在变量对象中(VOG(window)\AO),全局执行环境是最外层的执行环境
+
+- 在`JavaScript`运行的时候，主线程会形成一个栈，这个栈主要是解释器用来最终函数执行流的一种机制。通常这个栈被称为调用栈`Call Stack`，或者执行栈（`Execution Context Stack`）。
+
+  调用栈，顾名思义是具有LIFO（后进先出，Last in First Out）的结构。调用栈内存放的是代码执行期间的所有执行上下文。
+
+  - 每调用一个函数，解释器就会把该函数的执行上下文添加到调用栈并开始执行；
+  - 正在调用栈中执行的函数，如果还调用了其他函数，那么新函数也会被添加到调用栈，并立即执行；
+  - 当前函数执行完毕后，解释器会将其执行上下文清除调用栈，继续执行剩余执行上下文中的剩余代码；
+  - 但分配的调用栈空间被占满，会引发”堆栈溢出“的报错。
 
 - 块级作用域：块级作用域由最近的一对包含花括号{}界定(这里涉及到**let var const**的区别)
 
@@ -309,11 +318,11 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
   // 参数是个函数，返回的也是个函数
   // 返回的函数可以分多次传入参数
   // 在返回的函数内部，当接受的参数个数与最原始参数值相同(或大于)时要执行这个函数，参数小于原本的参数个数时返回一个函数
-  // 如果fn = (...rest) => {}用扩展运算符来传入参数此时，fn.length的值为0
+  // 如果fn = (...rest) => {}用扩展运算符来传入参数此时，fn.length的值为0??
   function curry (fn) {
     return function curried(...args) {
       if (args.length < fn.length) {
-        return () => arguments.callee(...args, ...arguments)
+        return (...rest) => arguments.callee(...args, ...rest)
       }
       return fn(...args)
     }
@@ -421,7 +430,7 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
              }
         }
         subscribe (type, callFn) {
-             const currType = this.listeners[type]
+           const currType = this.listeners[type]
            if (!currType) {
                this.listeners[type] = []
            }
@@ -550,14 +559,14 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
       }
       mapCahche.set(target, cloneTarget)
       // map
-      if (type is map) {
+      if (type === '[object Map]') {
         target.forEach((value, key) => {
           cloneObject.set(key, clone(value, mpCahche))
         })
         return cloneObject
       }
       // set
-      if (type is set) {
+      if (type === '[object Set]') {
         target.forEach((value) => {
           cloneObject.add(clone(value, mpCahche))
         })
@@ -626,7 +635,7 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 ### Generator对象  yield   function*
 
-- [迭代器协议](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Iteration_protocols#iterator)（具有next 方法）和 可迭代协议（[Symbol.terator]方法）
+- [迭代器协议](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Iteration_protocols#iterator)（具有next 方法）和 可迭代协议（[Symbol.iterator]方法）
 
 - function*： 定义一个**生成器函数**，返回一个**`Generator对象`**（生成器的迭代器对象，符合可迭代协议和迭代器协议）
 
@@ -673,7 +682,7 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
   arr = [...gen];
   ```
 
-  
+   
 
 ### Map WeakMap Set WeakSet
 

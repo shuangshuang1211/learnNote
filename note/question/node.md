@@ -1,9 +1,90 @@
+#### node特点以及适用场景
+
 - 事件驱动
 - 发布订阅
 - 观察者
 - 异步I/O、单线程
 
 node适合I/O高并发密集型的任务
+
+`模块实例(client).on('data', fnCallback)` 是可读流，读取数据
+
+`模块实例(client).write('content') 可写流写数据`
+
+#### TCP粘包及解决
+
+- 粘包产生原因：数据发送端和接收端会对数据进行一个缓冲(什么时候发送数据是由TCP的拥赛机制决定的)，然后再消费数据，这样提高I/O操作的性能
+
+- 解决方法：
+
+  - 可以让发送数据操作设定一定的时间间隔，这样降低了传输效率
+  - 数据封包和拆包：数据传输包括消息头（有序列号和长度信息）、消息体
+
+  ```js
+  // server
+  const net = require('net')
+  const server = net.createServer()
+  server.listen('端口号', 'ip地址：127.0.0.1')
+  server.on('listening', () => {})
+  // 监听客户端的请求
+  server.on('connection', (socket) => {
+    socket.on('data', (chunk) => {
+      if (overageBuffer) {
+        chunk = Buffer.concat([overageBuffer, chunk])
+      }
+      let packageLen = 0
+      while(packageLen = ts.getPackageLen(chunk)) {
+        const packageCon = chunk.slice(0, packageLen)
+        chunk = chunk.slice(packageLen)
+  
+        const ret = ts.decode(packageCon)
+        console.log(ret)
+  
+        socket.write(ts.encode(ret.body, ret.serialNum))
+      }
+      overageBuffer = chunk
+    })
+  })
+  
+  // client
+  const net = require('net')
+  const MyTransform = require('./myTransform.js')
+  
+  let overageBuffer = null 
+  let ts = new MyTransform()
+  
+  const client = net.createConnection({
+    host: 'localhost', 
+    port: 1234
+  })
+  
+  client.write(ts.encode('拉勾教育1'))
+  //client.write(ts.encode('拉勾教育2'))
+  //client.write(ts.encode('拉勾教育3'))
+  //client.write(ts.encode('拉勾教育4'))
+  //client.write(ts.encode('拉勾教育5'))
+  
+  client.on('data', (chunk) => {
+    if (overageBuffer) {
+      chunk = Buffer.concat([overageBuffer, chunk])
+    }
+    let packageLen = 0
+    while(packageLen = ts.getPackageLen(chunk)) {
+      const packageCon = chunk.slice(0, packageLen)
+      chunk = chunk.slice(packageLen)
+  
+      const ret = ts.decode(packageCon)
+      console.log(ret)
+    }
+    overageBuffer = chunk
+  })
+  ```
+
+  
+
+#### Http协议
+
+原理 组成 断点续传编码缓存等
 
 #### CommonJs 和 ESM 的差异？
 
