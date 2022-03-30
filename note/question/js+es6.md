@@ -80,7 +80,22 @@
             return false;
           }
     ```
+    
+  - ```js
+    Function.prototype === Function.__proto__ === Object.__proto__ 指向内置的一个function  anonymous对象
+    [function  anonymous].__proto__ === Object.prototype
+    Object.prototype.__proto__ === null
+    ```
   
+  - ```js
+    function F () {}
+    Function.prototype.a = () => {}
+    Object.prototype.b = () => {}
+    const f = new F()
+    console.log(F.a, F.b, f.a, f.b)
+    ```
+  
+    
 
 JavaScript 如何实现这些特点，比如封装、继承、多态。如果关于上述三点，你能够解释到有多少种实现方式、优缺点是什么。以及近几年流行的解决方案是什么。这就是**「加分」**，比如对于继承吧。类式继承、构造函数继承、组合继承、原型继承、寄生组合继承等等，说出大概的实现思路和优缺点，再介绍下 extends 或者 mixin 的实现甚至你可以衍生到JavaScript 的模块化发展甚至到为什么现在 TS 如此流行。那么可以说到这一环节解答的就非常棒了。
 
@@ -130,7 +145,7 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
   - **微任务**： 可以理解是在当前任务执行结束后需要立即执行的任务。也就是说，在当前任务后，在渲染之前，执行清空任务。 所以它的响应速度相比宏任务会更快，因为无需等待 UI 渲染。
 
-     微任务包含：Promise.then(async await语法糖)、MutaionObserver(对DOM树进行监测)、process.nextTick(Node.js 环境)等
+     微任务包含：Promise.then(以及async await语法糖)、MutaionObserver(对DOM树进行监测)、process.nextTick(Node.js 环境)等
   
      > 根据Rendering opportunities来判断每轮`event loop`是否需要进行更新渲染，会根据浏览器刷新率以及页面性能或是否后台运行等因素判断的。如果`hasARenderingOpportunity` 为`true`，需要更新渲染，接下来就需要执行各种渲染所需工作：
      >
@@ -188,8 +203,23 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 - 函数作用域：函数在创建的时候就明确了作用域[[SCOPE]]，就是创建时所处的执行上下文对应的活动对象
   - 函数调用基本会有几个步骤：确定作用域链（最左边就是自己的作用域，最右边就是ECG），确定this，初始化arguments，形参赋值(相当于在当前AO中新增一个变量)，变量提升，代码运行
+  
   - 模块模式：IIFE(ES5尚未支持块级作用域，使用此方法模拟块级，封装模块)，在IIFE中**绑定为函数名的标识符不能再绑定为其它值，即该标识符绑定是不可更改的**
-
+  
+    ```js
+    var a = 2;
+    function foo(){
+        console.log(a)
+    }
+    function bar(){
+        var a = 3;
+        foo();
+    }
+    bar() // 输出2
+    ```
+  
+    
+  
 - 作用域链：当代码在一个环境中执行时，会创建变量对象的一个作用域链，其作用是保证对当前执行环境有权访问的变量和函数进行有序访问，作用域链的前端，始终都是当前执行的代码所 在环境的变量对象，全局执行环境的变量对象始终都是作用域链中的最后一个对象
 
 - 闭包： 闭包是一种机制，当前函数执行时创建的执行的上下文不会被销毁，闭包可以保护这个私有上下文中的变量不受其他上下文的变量影响，而且当前上下文创建的数据可以被当前上下文以外的变量引用
@@ -221,8 +251,30 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 ### var、let 、const
 
-- var：声明的变量在函数作用域内，提升变量声明到函数作用域顶部，但值不会； 可用var重复申明同一个变量；var在全局作用域申明的变量在web环境中会成为window的属性(node环境没有BOM)
--  let: 声明的变量范围是块作用域；具有暂时性死区，不可进行变量提升；let不可重复声明同一个变量，但与var声明的变量一样可重复赋值；let在全局作用域申明的变量不能成为window的属性
+- var：声明的变量在函数作用域内，提升变量声明到函数作用域顶部，但值不会；在函数作用域内，省略var定义的变量在非严格模式下在这个函数执行一次后，会成为window的一个属性； 可用var重复申明同一个变量；var在全局作用域申明的变量在web环境中会成为window的属性(node环境没有BOM)
+
+  - 在全局作用域下用var申明的变量在浏览器环境下会成为window的属性
+  - 通过函数声明的方式（非函数表达式）声明的函数在代码执行之前被js引擎提升到了当前作用域的顶部，而且函数声明提升优先于变量声明提升
+
+- let: 声明的变量范围是块作用域；具有暂时性死区，不可进行变量提升；let不可重复声明同一个变量，但与var声明的变量一样可重复赋值；let在全局作用域申明的变量不能成为window的属性
+
+  ```js
+  // let 跟 var 的作用差不多，但有着非常重要的区别。最明显的区别是，let 声明的范围是块作用域， 而 var 声明的范围是函数作用域。
+  if (true) { 
+    var name = 'Matt';
+    console.log(name); // Matt
+  }
+  console.log(name);   // Matt
+  
+  if (true) {
+    let age = 26;
+    console.log(age);  // 26
+  }
+  console.log(age);  // ReferenceError: age 没有定义
+  ```
+
+  
+
 - const: 基本与let一致，但不能给变量重新赋值，且声明变量的同时也要进行变量初始化；
 
 
@@ -239,7 +291,7 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 - 构造函数调用(new)
     - **创建一个新对象**
-    - **新对象的[[ProtoType]] 赋值为构造函数的prototype属性(即新建的实例的属性方法是在原型对象上)**
+    - **新对象的[[ProtoType]] (__ proto __)赋值为构造函数的prototype属性(即新建的实例的属性方法是在原型对象上)**
     - **构造函数内部的 this 被赋值为这个新对象(this指向这个新对象)**
     - **执行构造函数内部代码(给新对象增加属性或方法)**
     - **构造函数有无返回(不返回或返回一个基本数据类型都相当于不返回)，**有且不为空的一个**对象**返回这个对象，否则就返回新建的新对象
@@ -290,7 +342,19 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
     
     ```
 
+### 判断数组的方法，优劣
 
+- Object.prototype.toString.call(TragetObj): 任何类型都可以判断，包括null 和undefined
+
+   `Object.prototype.toString.call('sdsd') ： '[object String]'`
+
+  `Object.prototype.toString.call(null) '[object Null]'`
+
+  `Object.prototype.toString.call(undefined)： '[object Undefined]'`
+
+- instanceof： 判断对象的原型链中是不是能找到类型的prototype
+
+- Array.isArray(): ES5新增， 当检测 Array 实例时，Array.isArray 优于 instanceof ，因为 Array.isArray 可以 检测出 iframes
 
 ### 函数式编程、高阶函数、函数柯里化
 
@@ -471,6 +535,10 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 - **适配器模式**： 
 
+- **访问者模式**：
+
+  - 
+
 
 
 ### Promise 手动实现、考题
@@ -577,13 +645,47 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
       let i = 0;
       while (i < keys.length) {
         const value = target[keys[i]];
-        cloneObject[i] = clone(value, mapCahche)
+        cloneObject[keys[i]] = clone(value, mapCahche)
         i++
       }
       return cloneObeject
     }
+    
+    
+    // 新的简洁拷贝， 没有拷贝函数
+    function deepClone (data, cahcheMap = new WeakMap) {
+      console.log('++++', data.constructor)
+      if (data == null) return data
+      if (data instanceof Date)  return new Date(data)
+      if (data instanceof RegExp) return new RegExp(data)
+      if (data instanceof Symbol) return Object(Symbol.prototype.valueOf.call(data))
+      if (typeof data !== 'object') return data
+      if (cahcheMap.get(data)) return cahcheMap.get(data)
+      const cloneObj = new data.constructor()
+      console.log('****', cloneObj)
+      cahcheMap.set(data, cloneObj)
+      if (data instanceof Map) {
+        for (let [key, value] of data) {
+          cloneObj.set(key, deepClone(value, cahcheMap))
+        }
+        return cloneObj
+      }
+      if (data instanceof Set) {
+        for (let value of data) {
+          cloneObj.add(deepClone(value, cahcheMap))
+        }
+        return cloneObj
+      }
+      for (let key in data) {
+        console.log('*key***', key)
+        if (Object.hasOwnProperty.call(data, key)) {
+          cloneObj[key] = deepClone(data[key], cahcheMap)
+        }
+      }
+      return cloneObj
+    }
     ```
-  
+    
     
 
 ### for...of... for...in 区别
@@ -632,6 +734,7 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 - 使用这样的形式最多 `const id = Symbol.for('id')`，全局使用
 - 还有就是内置的Symbol.iterator
 - 每个从Symbol()返回的symbol值都是唯一的，一个symbol值能作为对象属性的标识符
+- `typeof Symbol('key'): 'symbol'; typeof 函数: 'function'; typeof Set/Map/null: 'object'`
 
 ### Generator对象  yield   function*
 
@@ -680,8 +783,20 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
   var arr = [ 'a', ['b',[ 'c', ['d', 'e']]]];
   var gen = iterArr(arr);
   arr = [...gen];
+  
+  // reduce + recursivity
+  function flatArr (arr) {
+    return arr.reduce((acc, cur) => {
+      if (Array.isArray(cur)) {
+        return acc.concat(flatArr(cur))
+      } else {
+        acc.push(cur)
+      }
+      return acc
+    }, [])
+  }
   ```
-
+  
    
 
 ### Map WeakMap Set WeakSet
@@ -796,7 +911,106 @@ console.log('userProxy.name: ', userProxy.name);
 console.log('admin.name: ', admin.name);
 ```
 
+### axios封装的问题
 
+- 请求头处理，错误处理，数据适配（拦截器对response处理），再加上性能监控
+
+### super关键字
+
+- super关键字用于访问和调用一个对象的父对象上的函数
+
+- super 关键字使用的注意几个问题：
+
+  - 在派生类中的构造函数中super()要在this使用之前(原因)，就相当于调用super.prototype.constructor.call(this,name)
+
+  - 只能在派生类的构造函数实例方法和静态方法中使用...
+
+       如果在派生类中显式定义了构造函数，则要么必须在其中调用 super()，要么必须在其中返回 一个对象
+          https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/super
+
+### 事件代理
+
+- 就是把一个元素响应事件（`click`、`keydown`......）的函数委托到另一个元素，这是基于事件冒泡实现的
+
+### AJAX原理及实现（Async Javascript and XML）
+
+- `Ajax`的原理简单来说通过`XmlHttpRequest`对象来向服务器发异步请求，从服务器获得数据，然后用`JavaScript`来操作`DOM`而更新页面
+
+- 实现过程
+
+  - 创建 `Ajax`的核心对象 `XMLHttpRequest`对象
+
+  - 通过 `XMLHttpRequest` 对象的 `open()` 方法与服务端建立连接
+
+  - 构建请求所需的数据内容，并通过`XMLHttpRequest` 对象的 `send()` 方法发送给服务器端
+
+  - 通过 `XMLHttpRequest` 对象提供的 `onreadystatechange` 事件监听服务器端你的通信状态
+
+  - 接受并处理服务端向客户端响应的数据结果
+
+  - 将处理结果更新到 `HTML`页面中
+
+    ```js
+    const getUrl = (url) => {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', url);
+          xhr.onreadystatechange = () => {
+            if (this.readystate !== 4) {
+              return ;
+            } else {
+              if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+                resolve(xhr.responseText);
+              } else {
+                reject(xhr.statusText);
+              }
+            }
+          }
+          xhr.responseType = "json";
+          xhr.setRequestHeader('Accept', 'application/json');
+          xhr.send();
+        });
+      };
+    ```
+
+    
+
+### DOM常见的操作
+
+- createElement
+- innerHTML
+
+
+
+### 递归和尾递归
+
+- 递归调用的过程当中系统为每一层的返回点、局部量等开辟了栈来存储，递归次数过多容易造成栈溢出
+
+### 内存泄漏
+
+- 意外的全局变量、没有清楚的定时器、没有清楚对DOM的引用等
+
+### 本地存储
+
+见浏览器分享文档
+
+### js中数字精度丢失的问题？(待深入了解)
+
+- 在`JavaScript`中，现在主流的数值类型是`Number`，而`Number`采用的是`IEEE754`规范中64位双精度浮点数编码，其长度为8个字节，即64位比特
+
+- 64位比特又可分为三个部分：
+
+  - 符号位S：第 1 位是正负数符号位（sign），0代表正数，1代表负数
+  - 指数位E：中间的 11 位存储指数（exponent），用来表示次方数，可以为正负数。在双精度浮点数中，指数的固定偏移量为1023
+  - 尾数位M：最后的 52 位是尾数（mantissa），超出的部分自动进一舍零
+
+- 计算机存储双精度浮点数需要先把十进制数转换为二进制的科学记数法的形式，然后计算机以自己的规则{符号位+(指数位+指数偏移量的二进制)+小数部分}存储二进制的科学记数法
+
+  因为存储时有位数限制（64位），并且某些十进制的浮点数在转换为二进制数时会出现无限循环，会造成二进制的舍入操作(0舍1入)，当再转换为十进制时就造成了计算误差
+
+### 单点登录，如何实现
+
+- 
 
 1. 排序算法(至少三种)*
 
@@ -806,7 +1020,7 @@ console.log('admin.name: ', admin.name);
 
 4. sum(1) sum(1)(2)(3)(4) sum(1, 2, 3, 4);
 
-9. 进程与线程？
+5. 进程与线程？
 
     进程： 相当于打开一个应用程序(打开浏览器页面浏览器是多进程，多个页面互不干扰)
 
@@ -814,7 +1028,7 @@ console.log('admin.name: ', admin.name);
 
     throw error后，后续代码不会执行，但是前面添加的异步代码会执行，死循环主线程会一直占用，所以异步的回调都不会放入主线程执行
 
-10. 打开一个浏览器会有哪些进程
+6. 打开一个浏览器会有哪些进程
 
      DOM事件监听
 
@@ -826,14 +1040,7 @@ console.log('admin.name: ', admin.name);
 
      js引擎执行线程，主线程
 
-12. super方法的理解？super关键字用于访问和调用一个对象的父对象上的函数,
-         super 关键字使用的注意几个问题：
-       只能在派生类的构造函数实例方法和静态方法中使用...
-       在派生类中的构造函数中super()要在this使用之前(原因)
-       如果在派生类中显式定义了构造函数，则要么必须在其中调用 super()，要么必须在其中返回 一个对象
-          https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/super
-
-13. weakMap 和 Map的区别， Set和weakSet？
+7. weakMap 和 Map的区别， Set和weakSet？
          集合 与 字典 的区别：
          共同点：集合、字典 可以储存不重复的值
          不同点：集合 是以 {value, value}的形式储存元素，字典 是以 {key => value} 的形式储存
@@ -856,11 +1063,11 @@ console.log('admin.name: ', admin.name);
        不能遍历，方法有get、set、has、delete
          https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/6
 
-14. 数据结构?
+8. 数据结构?
           基本数据类型： string number(NaN == NaN false) symbol boolean null(null 值表示一个空对象指针) undefined bigint
           引用类型： object array set map
 
-15. 理解promise
+9. 理解promise
 
      promise 的executor函数报错时，此时promise实例的状态会是rejected，此时值是报错的原因
 
@@ -868,70 +1075,171 @@ console.log('admin.name: ', admin.name);
 
      then中的回调函数执行不报错返回的是fulfilled的promise，如果返回的是promise，就是这个返回promise的状态
 
-16. Async
+10. Async
 
-     async函数执行返回的是一个promise，如果函数体内没有报错，返回的就是fulfilled的promise值为函数返回的值，没有就是undefined
+      async函数执行返回的是一个promise，如果函数体内没有报错，返回的就是fulfilled的promise值为函数返回的值，没有就是undefined
 
-     - await一般配合async使用，后面放的是promsie的实例，如果不是则会转为promise的实例
-     - await foo() ，此时foo函数会被立即调用，且foo的返回值可以被处理成promise值，await 后面的代码相当于then
+      - await一般配合async使用，后面放的是promsie的实例，如果不是则会转为promise的实例
+      - await foo() ，此时foo函数会被立即调用，且foo的返回值可以被处理成promise值，await 后面的代码相当于then
 
-17. Date RegExp 等创建的实例都有 toLocalString() toString() valueof() 等方法；
-        原始值包装类型：
-        Boolean
-        Number
-        String =>（slice()、substr(子字符串截取的开始位置index， 截取子字符串的长度)和 substring()）
+11. Date RegExp 等创建的实例都有 toLocalString() toString() valueof() 等方法；
+           原始值包装类型：
+           Boolean
+           Number
+           String =>（slice()、substr(子字符串截取的开始位置index， 截取子字符串的长度)和 substring()）
 
-18. 20220217 pm
+12. 20220217 pm
 
-    - z-index什么情况下失效
+       - z-index什么情况下失效
 
-      `z-index` 属性设定了一个定位元素及其后代元素或 flex 项目的 z-order
+         `z-index` 属性设定了一个定位元素及其后代元素或 flex 项目的 z-order
 
-    - 0.1 + 0.2为什么不等于0.3
+       - 0.1 + 0.2为什么不等于0.3
 
-    - 作用域链闭包this的指向，箭头函数的this
+       - 作用域链闭包this的指向，箭头函数的this
 
-    - null和undefined的区别
+       - null和undefined的区别
 
-    - 有哪些基本数据类型（七种），null是基本数据类型嘛？yes，typeof null = ‘object’
+       - 有哪些基本数据类型（七种），null是基本数据类型嘛？yes，typeof null = ‘object’
 
-      **null是一个表示"无"的对象，转为数值时为0；undefined是一个表示"无"的原始值，转为数值时为NaN。**
+         **null是一个表示"无"的对象，转为数值时为0；undefined是一个表示"无"的原始值，转为数值时为NaN。**
 
-    - instanceof实现
+       - instanceof实现
 
-    - Proxy用在React哪些地方
+       - Proxy用在React哪些地方
 
-    - React怎么减少渲染，也是优化性能吧
+       - React怎么减少渲染，也是优化性能吧
 
-    - setState更新机制，setTimeOut中设置setTate后能拿到新的值吗？
+       - setState更新机制，setTimeOut中设置setTate后能拿到新的值吗？
 
-    - 异步的实现方式
+       - 异步的实现方式
 
-    - 强缓存和协商缓存
+       - 强缓存和协商缓存
 
-    - curry以及应用
+       - curry以及应用
 
-    - redux原理
+       - redux原理
 
-    - BFC、回流重绘
+       - BFC、回流重绘
 
-    - 怎么查找内存泄漏
+       - 怎么查找内存泄漏
 
-    - 手写promise
+       - 手写promise
 
-19. 20220222 am
+13. 20220222 am
 
-    - 什么是闭包？事件循环
-    - 对promise的理解，throw error的代码会被catch吗？yes，throw error与reject有什么区别
-    - 迭代器相关，怎么实现迭代器
-    - 为什么要进行长链接？什么是长链接
-    - React的setState是同步还是异步
-    - 合成事件，什么是事件捕获和冒泡
-    - saga相比于redux-thunk的优劣势
-    - BFC和块元素和内联元素的区别
-    - useMemo和useCallback的区别
-    - ts的问题，type和interface的区别，type定义的数据可以实现继承吗
-    - ts相比于js特有的数据类型
-    - useReducers
-    - useRef的使用
+       - 什么是闭包？事件循环
+       - 对promise的理解，throw error的代码会被catch吗？yes，throw error与reject有什么区别
+       - 迭代器相关，怎么实现迭代器
+       - 为什么要进行长链接？什么是长链接
+       - React的setState是同步还是异步
+       - 合成事件，什么是事件捕获和冒泡
+       - saga相比于redux-thunk的优劣势
+       - BFC和块元素和内联元素的区别
+       - useMemo和useCallback的区别
+       - ts的问题，type和interface的区别，type定义的数据可以实现继承吗
+       - ts相比于js特有的数据类型
+       - useReducers
+       - useRef的使用
+
+14. 20220308 纽酷
+
+       - 一个递归的树级递归编程题
+       - 垃圾回收、Fiber架构、webpack打包流程、常用的loader、vdom diff
+       - 项目怎么部署的，流程，后端服务
+
+15. 0315 xx
+
+       - 什么是CDN
+       - React生命周期
+       - css3的新特性
+       - 跨域、display visibility opacity三种的区别
+       - 前端性能优化
+
+16. 0317 bytedance
+
+      - 什么是CDN,更新的时机，为什么需要，怎么做
+
+      - 热更新的原理
+
+      - loader和plugin的区别
+
+      - 一个async await的时序题
+
+      - 一个 原型链和new的题
+
+        ```js
+        function F () {}
+        Function.prototype.a = () => {}
+        Object.prototype.b = () => {}
+        const f = new F()
+        console.log(F.a, F.b, f.a, f.b)
+        ```
+
+      - 手写 Ts Partial实现
+
+      - 编程题
+
+        ```js
+        const foo1 = {
+          'A': 1,
+          'B.A': 2,
+          'B.B': 4,
+          'CC.D.E': 3,
+          'CC.D.F': 5
+        }
+        function transferFn (data) {
+          let objRes = {}
+          for (let key in data) {
+            const keys = key.split('.')
+            const len = keys.length
+            // console.log('keys', keys)
+            keys.reduce((acc, cur, index) => {
+              acc[cur] = acc[cur] || {}
+              if (index === len - 1) {
+                acc[cur] = data[key]
+              }
+              // console.log('acc', acc)
+              return acc[cur]
+            }, objRes)
+          }
+          return objRes
+        }
+        ```
+
+        
+
+      - react子父通信
+
+      - js模块的发展，cmd与esmodule的区别
+
+      - 事件循坏机制
+
+      - 实现跨域的方法
+
+17. 0321bytedance 二面
+
+    - 虚拟列表的实现原理
+    - flex 细节，basis的默认值有哪些？auto是什么宽度？basis设置的元素的什么？shrink是怎么计算的
+    - setState连续设置多次回多次渲染吗？hooks里面呢？怎么让setState变成可控的，fiber考虑等
+    - react hook实现原理
+    - infer的用法, ts中几个类型的含义
+    - 浏览器渲染机制
+    - 编程题“1+2-3+15-2”
+
+18. 0329
+
+    - 上午
+      - 一个页面，怎么做首屏渲染优化，怎么做首页图片加载优化等？
+      - hooks的缺点
+
+    - 下午
+
+      - useEffect中返回的函数执行时机？
+
+      - promise原理，说说promise
+
+      - 泛型使用在什么地方
+      - 父组件怎么取到子组件的函数？ref怎么取？
+      - async await的原理
 

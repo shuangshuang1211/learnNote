@@ -1,6 +1,6 @@
 # React
 
-
+MDX？了解
 
 #### React的优势是什么？
 
@@ -41,9 +41,11 @@ React是一个js库,  一切皆是组件，声明式范式可以轻松描述应�
 
   **`updateQueue.shared.pending 就是待执行的任务，首次渲染就是null，会把初始更新的任务挂在到这里`**
 
-- workLoopSync, 循环更新，每更新一个Fiber节点就判断下是否有更优先级的任务要执行
+- workLoopSync, 循环更新，每更新一个Fiber节点就判断下是否有更高优先级的任务要执行
 
 - 执行performUnitOfWork，beginWork（从父到子构建）,构建Fiber树，深度优先遍历，构建当前Fiber节点的子级FIber，确立子级fiber的同级fiber关系(sibling: 下一个兄弟节点,return： 父Fiber),第一个子节点是workInProggress节点的子级。当前节点有子级返回子级重复上述步骤，当workInProgress没有子节点，开始构建的向上阶段，并开始构建Fiber链表。当前workInprogress存在(while)，则执行compeleteUnitofWork构建Fiber链表(并为每个节点构建stateNode(真实DOM))，用当前Fiber的父Fiber保存firstEffect和lastEffect，当前Fiber的first和last先赋给父Fiber，有EffectTag则进行链表lastEffect.nextEffect的赋值，并把父FIber的lastEffect指向当前Fiber，执行完成后，有同级则返回同级执行performUnitOfWork，没有同级workInProgress 则指向父级，找父级的同级执行completeUnitOfWork
+
+- 以上发生在render阶段
 
 - 以上整个过程完成，则进行commitRoot阶段，这个阶段不能中断，遍历Fiber链表，从firstFiber开始挂载DOm
   - 第一次遍历 effects list（commitBeforeMutationEffects）：在更改前读取 DOM 上的 state，这里是 getSnapshotBeforeUpdate [生命周期](https://www.zhihu.com/search?q=生命周期&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"article"%2C"sourceId"%3A103506207})（此函数只在更新阶段调用首次渲染不会执行）调用的地方；
@@ -95,9 +97,18 @@ React是一个js库,  一切皆是组件，声明式范式可以轻松描述应�
 
     ![scheduler_reconclier_render](./images/scheduler_reconclier_render.png)
 
+- React分为两个阶段（[官网](https://zh-hans.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects)）
+  
+  - **渲染** 阶段会确定需要进行哪些更改，比如 DOM。在此阶段，React 调用 `render`，然后将结果与上次渲染的结果进行比较。(最耗时)
+  
+    `提交阶段通常会很快，但渲染过程可能很慢。因此，即将推出的 concurrent 模式 (默认情况下未启用) 将渲染工作分解为多个部分，对任务进行暂停和恢复操作以避免阻塞浏览器。这意味着 React 可以在提交之前多次调用渲染阶段生命周期的方法，或者在不提交的情况下调用它们（由于出现错误或更高优先级的任务使其中断）。`
+  
+  - **提交** 阶段发生在当 React 应用变化时。（对于 React DOM 来说，会发生在 React 插入，更新及删除 DOM 节点的时候。）在此阶段，React 还会调用 `componentDidMount` 和 `componentDidUpdate` 之类的生命周期方法。
+  
 - render阶段：构建 Fiber 对象，构建链表，在链表中标记要执行的 DOM 操作 ，可中断。
+  
   - 深度遍历优先，从上向下走，构建节点对应的 Fiber 对象，然后再从下向上走，构建 Fiber 对象及链表。
-
+  
 - commit：根据构建好的链表进行 DOM 操作，不可中断(分为三个子阶段)
   - 第一个子阶段：循环Fiber effect链，执行commitBeforeMutationEffects (类： getSnapshotBeforeUpdate，函数组件调用useEffect)，返回值用于componentDidUpdate的地三个参数
   - 第二个子阶段：commitMutationEffects，插入节点commitPlacement(找到父级原生DOM插入)，更新节点commitWork(updatePayload对属性进行处理，针对HostComponent和HostText处理)，删除节点commitDeletion(非原生节点需要遍历子树，调用componentWillUnmount)，循环整个Fiber链表(firstEffet => nextEffect =>  ... => nextEffect = null, firstEffect)，根据EffectTag (Placement、Update、PlacementAndUpdate等)执行上述的DOm操作
@@ -240,25 +251,42 @@ function commitRoot() {
 
 #### React Suspense
 
+- 处理I/O密集型场景，用三元运算也可以实现，主要是会出现说waterfall的问题
+  - **Suspense是要解决那些本可以并发的异步操作（包含Promise的组件），变成序列化串行（waterfall）的问题，也就是上面提到的I/O密集型问题，而不单单是组件的显示内容问题**
+
 - 是一种在等待组件渲染前进行其他操作的同时渲染预先准备的内容的机制
 - Suspense的child必须是一个promise，需要promise的状态来触发suspense
 - 一般使用结合lazyload
-- 自己实现的话要对子组件实现专门的wrapped处理，保证不会重复加载
+- 自己实现的话要对子组件实现专门的wrapped处理，保证不会重复加载数据等
+- 怎么实现suspense？要抛出一个错误的promise
 
 #### React setState同步异步？
 
+- setState会将修改内容进行保存进行一个批量更新
+
+- 同步还是异步主要取决于它被调用的环境，即受react控制的时候比如生命周期内就是异步的(并且连续的setState的调用会进行一个状态的合并，类似于Object.assign())
+
 - 进入了 `react` 的调度流程，那就是异步的。没有进入 `react` 的调度流程，那就是同步的。`setTimeout` `setInterval` ，直接在 `DOM` 上绑定原生事件等都不会走React的调度流程，就是同步，其他的都是异步
 
-  `调用 `setState` 其实是异步的 —— 不要指望在调用 `setState` 之后，`this.state` 会立即映射为新的值`
+  `调用 `setState` 其实是异步的 —— 不要指望在调用 `setState` 之后，`this.state` 会立即映射为新的值`，这样的目的减少不必要的DOM的操作，减少频繁的render更新，因为如果每调用一次就走一次完整的生命周期流程性能开销比较大也没必要
 
   `事件处理函数内部的setState是异步的，如果 Parent 和 Child 在同一个 click 事件中都调用了 setState ，这样就可以确保 Child 不会被重新渲染两次`
 
 - scheduleUpdateOnFiber： 在这个函数中executionContext === NoContext则就是要同步更新
 
+- 如果要把同步更新的setstate变成异步的，有一个函数unstable_batchedUpdates(() => {}) ,强制批量更新
+
+  ![image-20220309235113507](./images/setState.png)
+
 #### React 合成事件
 
 - `SyntheticEvent` 实例将被传递给事件处理函数，它是浏览器的原生事件的跨浏览器包装器
 - stopPropagation和preventDefault
+- 优势：减少内存消耗避免频繁解绑
+- React17的事件是注册到root上而非document，这主要是为了渐进升级，避免多版本的React共存的场景中事件系统发生冲突
+- 在源码中，createConatiner中，有一个`listenToAllSupprtedEvents(rootContainerElement)`
+  - allNativeEvent,原生事件，一开始react收集用到的所有事件名，实际上我们使用的事件最后都会冒泡到根节点，react的合成事件一开始会被注册到根节点上(除了selectchange时间就是复制选中的事件，只能被绑定在document上)
+
 
 #### 事件冒泡和捕获
 
@@ -494,7 +522,65 @@ function withSubscription(WrappedComponent, selectData) {
 - 合理运用shouldComponentUpdate 和pureComponent 以及React.memo
 - 不要再render方法中运用HOC，这不仅仅是性能问题 - 重新挂载组件会导致该组件及其所有子组件的状态丢失
 
+#### Virtual DOM 真的比操作原生 DOM 快吗?
 
+- VirtualDOM最大的好处在于抽象了渲染的过程，为应用带来了跨平台的能力
+- Virtual DOM为UI函数式编程打开了大门，用声明式的方式来描述目的
+- 页面真正的消耗在于DOM的操作，而diff等js计算相比起来极其便宜
+- VD优化了只有微小变动的时候，页面更新保证了性能，减少了不必要的DOM操作
+
+#### Hook的实现原理
+
+- hook用闭包来保存状态，使用链表来保存一系列的hooks，把第一个hook与fiber关联，fiber树更新的时候就可以计算出最终的输出状态和相关的副作用
+- 不能在if中使用，只能在函数中使用
+- memorizeState保存在fiber节点上
+
+#### 虚拟列表实现
+
+- 原理：在vListContainer中渲染了一个真实list高度的“幻影”容器从而允许用户进行滚动操作。其次我们监听了onScroll事件，并且在每次用户触发滚动是动态计算当前滚动Offset（被滚上去隐藏了多少）所对应的开始下标（index）是多少。当我们发现新的下边和我们当前展示的下标不同时进行赋值并且setState触发重绘。当用户当前的滚动offset未触发下标更新时，则因为本身phantom的长度关系让虚拟列表拥有和普通列表一样的滚动能力。当触发重绘时因为我们计算的是startIndex 所以用户感知不到页面的重绘（因为当前滚动的下一帧和我们重绘完的内容是一致的）
+
+[[参考](https://slbyml.github.io/QA/virtaul.html#_2-%E5%AF%B9-react-%E7%9A%84-virtual-dom-%E7%9A%84%E8%AF%AF%E8%A7%A3%E3%80%82)]
+
+#### render需要满足的条件
+
+`React`创建`Fiber树`时，每个组件对应的`fiber`都是通过如下两个逻辑之一创建的：
+
+- render。即调用`render`函数，根据返回的`JSX`创建新的`fiber`。
+- bailout。即满足一定条件时，`React`判断该组件在更新前后没有发生变化，则复用该组件在上一次更新的`fiber`作为本次更新的`fiber`。
+- **什么时候进入bailout逻辑？**
+  - oldProps === newProps
+  - Context的value没有改变
+  - workInProgress.type === current.type 
+  - !includesSomeLane(renderLanes, updateLanes)， 当前`fiber`上是否存在`更新`，如果存在那么`更新`的`优先级`是否和本次整棵`fiber树`调度的`优先级`一致？
+
+#### React 中Lane优先级
+
+- Lane：不同的赛道可以作为同一批次执行，同一个赛道中的任务有不同的优先级
+- React事件优先级
+- Lane优先级
+- Scheduler优先级
+
+#### Error Boundaries
+
+- 16版本， [`componentDidCatch()`](https://zh-hans.reactjs.org/docs/react-component.html#componentdidcatch) ， static getDerivedStateFromError()，类组件中实现，只有 class 组件才可以成为错误边界组件(17.0)
+- 以下错误不能捕获
+  - 事件处理（[了解更多](https://zh-hans.reactjs.org/docs/error-boundaries.html#how-about-event-handlers)）
+  - 异步代码（例如 `setTimeout` 或 `requestAnimationFrame` 回调函数）
+  - 服务端渲染
+  - 它自身抛出来的错误（并非它的子组件）
+
+#### 设计基础组件的原则
+
+- 通用性，单一职责
+- 扁平的数据props，state跟功能相关，不能跟业务绑定
+- **放弃对DOM的掌控**，只提供**最基础的DOM、交互逻辑**
+- 纯组件
+- 多个小功能分离
+
+### useEffect中返回的函数执行时机
+
+- **会在组件卸载的时候执行清除操**
+- **会在执行当前 effect 之前对上一个 effect 进行清除**
 
 
 

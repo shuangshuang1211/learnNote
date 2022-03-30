@@ -171,3 +171,9 @@ let personProps: keyof Person; // 'name' | 'age'
 
 `T[K]`，**索引访问操作符**
 
+
+
+#### infer关键字
+
+- 推断待推断的类型
+

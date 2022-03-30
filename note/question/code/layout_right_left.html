@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>左右定宽，中间撑满</title>
+</head>
+<style>
+  /* #container {
+    display: flex;
+    height: 200px;
+    justify-content: space-between;
+  }
+  #child {
+    width: 200px;
+    background-color: aqua;
+  }
+  #middle {
+    background-color: blueviolet;
+    flex: 1;
+  } */
+  /* #container {
+    height: 200px;
+    width: 100vw;
+  }
+  #left {
+    position: absolute;
+    left: 0;
+    width: 200px;
+    background-color: aqua;
+    height: 200px;
+  }
+  #right {
+    position: absolute;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background-color: aqua;
+  }
+  #middle {
+    position: absolute;
+    width: 100%;
+    margin: 0 200px;
+    height: 200px;
+    background-color: blueviolet;
+  } */
+  #container {
+    display: grid;
+    height: 200px;
+    /* grid-template-columns: 200px auto 200px; */
+    grid-template-rows: 1fr 6fr 1fr;
+  }
+  #header {
+    background-color: aqua;
+  }
+  #content {
+    display: grid;
+    grid-template-columns: 200px auto 200px;
+  }
+</style>
+<body>
+  <div id="container">
+    <div id="header"></div>
+    <div id="content">
+      <div id="left"></div>
+      <div id="middle"></div>
+      <div id="right"></div>
+    </div>
+    <div></div>
+  </div>
+</body>
+</html>

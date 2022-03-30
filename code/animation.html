@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animation</title>
+</head>
+<body>
+  <div>
+    <div class="content ">cntent</div>
+  </div>
+</body>
+<style>
+  .content {
+    width: 200px;
+    background-color: brown;
+    height: 100px;
+    /* transform: translate3d(100px, 10px, 30px); */
+    /* transition: transform 2s ease-in 2s; */
+    /* transform: translateX(100px); */
+    transform: translateX(-200px);
+    animation: slider 2s ease-in 2s forwards;
+  }
+  @keyframes slider {
+    from {
+      transform: translateX(-200px);
+    }
+    to {
+      transform: translateX(100px);
+    }
+  }
+  /* .content:hover {
+    transform: translateX(100px);
+  } */
+</style>
+<script>
+  console.log('nn = ', n)
+  var n = 10;
+  
+  
+  var a = {
+    n: 1,
+    pro: {
+      getValue: () => {
+        console.log(this, this.n);
+      }
+    }
+  }
+  function n() {
+    n = 70
+    
+  }
+  
+  n()
+  console.log('nn = ', this.n)
+  a.pro.getValue();
+</script>
+</html>

@@ -17,8 +17,8 @@ var b = {n: 1};
 var c = b;
 
 b.x = b = {n: 2};  // b.x => c.x 后 b = {n: 2}; c.x = {n: 2};
-// console.log(b.x);
-// console.log(c.x);
+console.log(b.x);
+console.log(c.x);
 
 
 // 题2
@@ -31,7 +31,7 @@ var obj = {
   length: 5,
   method: function(fn) {
     fn();
-    console.log('');
+    // console.log('');
     arguments[0]();  // 要注意arguments来调用时，绑定的this是指向的arguments
   }
 }
@@ -47,3 +47,9 @@ var x = fn2(5); // ==> x 是window，且window中有x(指向自己)
 var y = fn2(6);
 // console.log(x.x); undefiend
 // console.log(y.x); // 6
+
+function F() {}
+Function.prototype.a = () => {}
+Object.prototype.b = () => {}
+const f = new F()
+console.log(f.a, f.b, F.a, F.b)

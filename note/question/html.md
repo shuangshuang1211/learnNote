@@ -152,6 +152,58 @@
 
 [参考]： [语雀](https://www.yuque.com/u11131/dpxrcd/sni37s#yDDOd)
 
+#### TCP特性，三次握手和四次挥手
+
+- TCP (传输控制协议) 提供一种**面向连接的、可靠的****字节流**服务，它使两台主机能够建立连接并交换数据流，上面应用层交下来的数据看成无结构的字节流来发送
+
+- **三次握手**的目的是连接服务器指定端口，建立 TCP 连接，并同步连接双方的序列号和确认号，交换 TCP 窗口大小信息。在 socket 编程中，客户端执行 `connect()` 时。将触发三次握手。
+
+  - 第一次握手(SYN=1, seq=x):
+
+    客户端发送一个 TCP 的 SYN 标志位置1的包，指明客户端打算连接的服务器的端口，以及初始序号 X,保存在包头的序列号(Sequence Number)字段里。
+
+    发送完毕后，客户端进入 `SYN_SEND` 状态。
+
+  - 第二次握手(SYN=1, ACK=1, seq=y, ACKnum=x+1):
+
+    服务器发回确认包(ACK)应答。即 SYN 标志位和 ACK 标志位均为1。服务器端选择自己 ISN 序列号，放到 Seq 域里，同时将确认序号(Acknowledgement Number)设置为客户的 ISN 加1，即X+1。 发送完毕后，服务器端进入 `SYN_RCVD` 状态。
+
+  - 第三次握手(ACK=1，ACKnum=y+1)
+
+    客户端再次发送确认包(ACK)，SYN 标志位为0，ACK 标志位为1，并且把服务器发来 ACK 的序号字段+1，放在确定字段中发送给对方，并且在数据段放写ISN的+1
+
+    发送完毕后，客户端进入 `ESTABLISHED` 状态，当服务器端接收到这个包时，也进入 `ESTABLISHED` 状态，TCP 握手结束。
+
+- 四次挥手：客户端或服务器均可主动发起挥手动作，在 socket 编程中，任何一方执行 `close()` 操作即可产生挥手操作。
+
+  - 第一次挥手(FIN=1，seq=x)
+
+    假设客户端想要关闭连接，客户端发送一个 FIN 标志位置为1的包，表示自己已经没有数据可以发送了，但是仍然可以接受数据。
+
+    发送完毕后，客户端进入 `FIN_WAIT_1` 状态。
+
+  - 第二次挥手(ACK=1，ACKnum=x+1)
+
+    服务器端确认客户端的 FIN 包，发送一个确认包，表明自己接受到了客户端关闭连接的请求，但还没有准备好关闭连接。
+
+    发送完毕后，服务器端进入 `CLOSE_WAIT` 状态，客户端接收到这个确认包之后，进入 `FIN_WAIT_2` 状态，等待服务器端关闭连接。
+
+  - 第三次挥手(FIN=1，seq=y)
+
+    服务器端准备好关闭连接时，向客户端发送结束连接请求，FIN 置为1。
+
+    发送完毕后，服务器端进入 `LAST_ACK` 状态，等待来自客户端的最后一个ACK。
+
+  - 第四次挥手(ACK=1，ACKnum=y+1)
+
+    客户端接收到来自服务器端的关闭请求，发送一个确认包，并进入 `TIME_WAIT`状态，等待可能出现的要求重传的 ACK 包。
+
+    服务器端接收到这个确认包之后，关闭连接，进入 `CLOSED` 状态。
+
+    客户端等待了某个固定时间（两个最大段生命周期，2MSL，2 Maximum Segment Lifetime）之后，没有收到服务器端的 ACK ，认为服务器端已经正常关闭连接，于是自己也关闭连接，进入 `CLOSED` 状态。
+
+[[参考](https://hit-alibaba.github.io/interview/basic/network/TCP.html)]
+
 #### **SSL/TLS协议(介于TCP和http之间)运行机制**
 
 - 对HTTP通信进行加密，避免被窃听(加密传播)、篡改(校验机制，一旦篡改及时发现)、冒充的风险(身份证书)
@@ -176,7 +228,7 @@
 
 #### HTTP应用层协议的几个版本对比：
 
-- **HTTP1.0:**  是一种无状态、无连接的应用层协议， 无连接的特性导致最大的性能缺陷就是无法复用连接，每次发送请求都需要进行TCP([TCP三次握手和四次挥手)](https://hit-alibaba.github.io/interview/basic/network/TCP.html)的连接，而这个过程又比较耗时
+- **HTTP1.0:**  是一种无状态、无连接的应用层协议， 无连接的特性导致最大的性能缺陷就是无法复用连接，每次发送请求都需要进行TCP连接，而这个过程又比较耗时
 
 - **HTTP1.1:**  在1.0基础上主要实现了以下几点的改善
 
@@ -196,7 +248,7 @@
 
 - **HTTPS**： HTTPS是在HTTP基础上加上TLS对通信进行加密，HTTP默认端口号是80，而HTPPS是443
 
-- **HTTP2.0(重点理解):**  是基于帧的协议(主流浏览器 HTTP/2 的实现都是基于 TLS )，采用分帧将重要信息封装起来，让协议的解析方可以轻松阅读、解析并还原信息，具有以下特点：
+- **HTTP2.0(重点理解基于SPDY协议):**  HTTP/2是二进制协议而不是文本协议(主流浏览器 HTTP/2 的实现都是基于 TLS )，二进制格式传输，采用分帧将重要信息封装起来，让协议的解析方可以轻松阅读、解析并还原信息，具有以下特点：
 
   - 多路复用： 可以并行交错的发送请求和响应，相互不影响；即所有的请求和响应都在同一个 TCP 连接上发送：客户端和服务器把 HTTP 消息分解成多个帧，然后乱序发送，最后在另一端再根据流 ID 重新组合起来
 
@@ -208,17 +260,59 @@
 
 [参考资料]： [HTTP/2](https://zhuanlan.zhihu.com/p/141458270 ) 、 TLS
 
+#### UDP协议
+
+- 用户数据包协议，是一个简单的**面向数据报的通信协议**
+- 对应用层交下来的报文，不合并，不拆分，只是在其上面加上首部后就交给了下面的网络层
+- 相比TCP而言，传输效率更高，无连接，不可靠
+
+#### Socket 编程
+
+- **Socket**是为了方便开发者直接使用更底层协议（一般是TCP或UDP）而存在的一个抽象层。Socket实际上是对TCP/IP协议的封装，本身并不是协议，而是一个调用接口（API）
+- Socket 还可以认为是一种网络间不同计算机上的进程通信的一种方法，利用三元组（ip地址，协议，端口）就可以唯一标识网络中的进程，网络中的进程通信可以利用这个标志与其它进程进行交互。
+
+#### WebSocket、HTTP与TCP
+
+Http、WebSocket等协议属于应用层协议，IP协议工作在网络层，TCP协议工作在传输层。HTTP、WebSocket等应用层协议，都是基于TCP协议来传输数据的。
+
+对于WebSocket来说，它必须依赖Http协议进行一次握手，握手成功后，数据就直接从TCP通道传输，与Http无关
+
 
 
 #### **CSRF和XSS攻击？**
 
-- Cross site request forgery: 是伪造请求，CSRF 攻击要成功的条件在于攻击者能够预测所有的参数从而构造出合法的请求(防止： 对参数进行加密)，冒充用户在站内的正常操作,比如发支持get发帖时就可以伪造这个get发帖
-  - 关键操作只接受用POST
-  - 用验证码来规避
-  - Referer(此请求头包含了当前请求页面的来源请求地址),不是每次都有Referer，一般用来监控CSRF攻击；
-  - Token：保持原有参数不变，增加一个token参数，值为随机
-- Cross site script：跨站脚本(xss)，注入攻击的一种，通过网页上可输入文本的地方注入可执行的代码
-  - 对所有用户输入的文本进行数据过滤（对HTMl escape等）
+- Cross site request forgery: 跨站请求伪造
+  
+  - CSRF发生过程：
+    - 用户登录浏览信任的网站A
+    - 网站A服务器验证通过，在用户端留下A的cookie
+    - 用户在没有登出网站A的情况下，访问恶意网站B
+    - 恶意网站B要求访问第三方（网站A），因此会对网站A发出请求
+    - 因为浏览器有网站A保存的cookie，因此请求中会带上cookie
+    - 网站A收到请求后，因为有cookie，会认为是用户，此时恶意网站B就达到了模仿用户的目的
+  
+  - CSRF**防范**：
+    - 后端验证Referer字段，访问来源是否可靠
+    - 开启cookie新属性SameSite，设置Strict
+    - Token验证： 保持原有参数不变，增加一个token参数，值为随机
+    - 双重cookie验证
+  
+  
+  **cookie 和 token 都存放在 header 中，为什么不会 劫持 token?**
+  
+  - 最主要的是因为浏览器不会自动携带token，而cookie会自动携带
+  
+- Cross site script(XSS)：跨站脚本攻击，代码注入攻击，通过网页上可输入文本的地方注入可执行的代码
+  - XSS攻击方式：
+    - 在html中内嵌的文本中，恶意内容以script标签形成注入
+    - 在内联的js中，拼接的数据突破了原本的限制（字符串，变量，方法名等）
+    - 在标签属性中，恶意内容包含引号，从而突破属性值的限制，注入其他属性或者标签
+    - 在标签的href、src等属性中，包含javascript:，jAvscript:，%20javascript: 等可执行代码
+    - 在onload、onerror、onclick等事件中，注入不受控制代码
+  - XSS如何防范：
+    - 对特殊符号（ "<、>、&、'、""）进行html转义，优先考虑使用
+    - 过滤特定的标记属性和事件
+    - 前端禁止对敏感cookie进行操作（httpOnly）
 
 
 
@@ -243,7 +337,7 @@
 
 
 
-#### 跨域和同源的理解？
+#### CORS跨域和同源的理解？
 
 - 实现跨域的方法：JSONP、CORS(跨域资源共享)、nginx代理跨域、websocket协议跨域、postMessage（window.parent.postMessage(data,origin)）、iframe+(document.domain、location.hash、 window.name)、
 
@@ -253,12 +347,25 @@
 
   - CORS(一般用于XMLHttpRequest)
 
+    - `跨源资源共享` ([CORS](https://developer.mozilla.org/zh-CN/docs/Glossary/CORS))（或通俗地译为跨域资源共享）是一种基于 [HTTP](https://developer.mozilla.org/zh-CN/docs/Glossary/HTTP) 头的机制，该机制通过允许服务器标示除了它自己以外的其它[origin](https://developer.mozilla.org/zh-CN/docs/Glossary/Origin)（域，协议和端口）
+
+      - 通过预检机制来检查服务器是否允许要发送的真实请求
+      - 预检请求的使用，可以避免跨域请求对服务器的用户数据产生未预期的影响。
+      - 简单请求可以不用发送预检请求，全部满足以下几点就是简单请求
+        - GET、HEAD、POST
+        - 人为可自动设置的首部字段集合(除用户代理自动设置的首部字段)：
+          - Accept、Accept-Language、Content-Lanuage、Content-Type
+        - Content-Type只能是：text/plain、multipart/form-data、application/x-www-form-urlencoded
+        - 请求中的任意 XHR对象没有均没有注册监听器
+        - 请求中没有使用ReadableStream对象
+    
     - 原理： 
-
+    
       - 通过请求头Origin <== >响应头部字段 Access-Control-Allow-Origin: * 配合实现（不安全）
-
       - 如果要携带cookie请求跨域，则要设置XMLHttpRequest的标志位withCredentials为true，如果服务器端的响应中未携带 `Access-Control-Allow-Credentials:` true，浏览器将不会把响应内容返回给请求的发送者;
       - 对于附带身份凭证的请求（通常是 `Cookie`），服务器不得设置 `Access-Control-Allow-Origin` 的值为“`*`” 
+    
+      
 
 
 
@@ -272,9 +379,21 @@
 - 渲染：如果实现动画，优先选用css，transform 和will-change，尽量减少重绘和回流
 - 代码层面：合理利用框架，给数据做缓存，纯组件等形式
 
+#### 不同行为的浏览器缓存
+
+- 缓存的位置：Service Worker、Memory Cache、Disk Cache、Push Cache
+  - Service Worker 实现缓存功能一般分为三个步骤：首先需要先注册 Service Worker，然后监听到 install 事件以后就可以缓存需要的文件，那么在下次用户访问的时候就可以通过拦截请求的方式查询是否存在缓存，存在缓存的话就可以直接读取缓存文件，否则就去请求数据。
+  - Push Cache（推送缓存）是 HTTP/2 中的内容，当以上三种缓存都没有命中时，它才会被使用。**它只在会话（Session）中存在，一旦会话结束就被释放，并且缓存时间也很短暂**
+
+- 打开网页，地址栏输入地址： 查找 disk cache 中是否有匹配。如有则使用；如没有则发送网络请求。
+
+- 普通刷新 (F5)：因为 TAB 并没有关闭，因此 memory cache 是可用的，会被优先使用(如果匹配的话)。其次才是 disk cache。
+
+- 强制刷新 (Ctrl + F5)：浏览器不使用缓存，因此发送的请求头部均带有 `Cache-control: no-cache`(为了兼容，还带了 `Pragma: no-cache`),服务器直接返回 200 和最新内容。
+
+  [[参考](https://www.jianshu.com/p/54cc04190252)]
 
 
-   
 
 2. 垂直居中，水平居中方法，四种？
     水平居中： *. {margin: 0 auto} *. 父元素 {display: flex; justify-content: center;}
@@ -334,3 +453,44 @@
 
 - application/x-www-form-urlencoded: 一般为form表单或ajax的默认编码方式，会把参数编码成字符串形式，参数之间用&拼接，参数与值之间用=拼接(这里参数在传递之前已经被encodeURI编码过一次); 后台获取参数使用request.getParameter()；
 - application/json：以json格式进行数据传输，在用ajax用这方式传递时，请求体要以json形式的字符串传递，后台通过request.getReader或getInputStream获取参数
+
+#### Restful
+
+- GET ： 幂等的，对应于数据库的 `select` 操作
+- PUT： 幂等， 用于所有的信息更新，对应于数据库的 `update `操作
+- PATCH：非幂等，用于局部信息的更新，对应于数据库的 `update` 操作
+- POST：非幂等，用于新增操作，对应于数据库的 `insert` 操作
+- DELETE：幂等，用于更新操作，对应于数据库的 `delete` 操作
+- OPTIONS：幂等，获取API的相关的信息
+- HEAD: 幂等，用于返回一个资源对象的“元数据”，或是用于探测API是否健康
+
+
+
+#### Canvas+Image实现画图
+
+```js
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+const image = new Image(100, 45); // Using optional size for image
+image.onload = drawImageActualSize; // Draw when image has loaded
+
+// Load an image of intrinsic size 300x227 in CSS pixels
+image.src = 'https://mdn.mozillademos.org/files/5397/rhino.jpg';
+
+function drawImageActualSize() {
+  // Use the intrinsic size of image in CSS pixels for the canvas element
+  canvas.width = this.naturalWidth;
+  canvas.height = this.naturalHeight;
+
+  // Will draw the image as 300x227, ignoring the custom size of 60x45
+  // given in the constructor
+  ctx.drawImage(this, 0, 0);
+
+  // To use the custom size we'll have to specify the scale parameters
+  // using the element's width and height properties - lets draw one
+  // on top in the corner:
+  ctx.drawImage(this, 0, 0, this.width, this.height);
+}
+```
+

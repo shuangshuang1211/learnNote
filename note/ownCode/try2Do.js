@@ -185,8 +185,8 @@ function quickSort (arr) {
     // arr[0] = arr[right];
     // arr[right] = pivot;
     // console.log('xxx', arr.slice(0,right), arr.slice(right));
-    quickSort(arr.slice(0,right));
-    quickSort(arr.slice(right));
+    // quickSort(arr.slice(0,right));
+    // quickSort(arr.slice(right));
     // return arr;
     return quickSort(arr.slice(0,right)).concat(quickSort(arr.slice(right)));
     // if (quickSort(arr.slice(right)) instanceof Array && quickSort(arr.slice(0, right)) instanceof Array) {
@@ -196,7 +196,8 @@ function quickSort (arr) {
 
 }
 
-// console.log('quickSort', quickSort([4,5,1,6, 2,1,7,3,5]));
+// console.log('quickSort', quickSort([4,5,1,6, 2,1,7,3,5,2,15,12]));
+
 function countSort(arr, max) {
   let buckt = new Array(max + 1);
   let arrLen = arr.length;

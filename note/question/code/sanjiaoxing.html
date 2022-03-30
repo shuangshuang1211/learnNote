@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>三角形的实现</title>
+</head>
+<style >
+  #contanier {
+    width: 0px;
+    height: 0px;
+    border-style: solid;
+    border-width: 0 50px 50px;
+    border-color: transparent transparent #d9534f;
+    position: relative;
+  }
+  #contanier:after {
+    content: '';
+    border-style: solid;
+    border-width: 0 40px 40px;
+    border-color: transparent transparent #f2f8f5;
+    position: absolute;
+    top: 6px;
+    left: -40px;
+  }
+</style>
+<body>
+  <div id="contanier">
+
+  </div>
+</body>
+</html>

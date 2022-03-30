@@ -91,16 +91,18 @@ node适合I/O高并发密集型的任务
 - 什么是模块化？将复杂的程序分割成几个块，是按照一定的规范来组织代码的形式
 - 模块化的好处？
   - 避免全局命名冲突、可复用性、可维护性、更好的分离与按需加载
-
 - CMS是一种超集，类似于EMAScript规范
 - CMS主要针对服务端，适用于同步加载，ES模块适用于浏览器端
 - CMS中加载时深度优先遍历加载, 第一次加载某个模块时，会缓存该模块。以后再加载该模块，就直接从缓存取出该模块的module.exports, 输入的是被输出的值的拷贝（这里要特别注意：这里是指在导出时给某个普通类型值放在module.exports内导出，此时在模块内修改这个值，外部不会变化，但是在外部通过引入的这个对象来修改是会改变的）[参考](https://javascript.ruanyifeng.com/nodejs/module.html)
   - CommonJS 模块输出的是一个值的拷贝，ES6 模块输出的是值的引用
   - commonjs导出的是module.exports，commonjs的导入就是变量赋值。当module.exports的值是字符串、数字等原始类型时，赋值是值拷贝才会产生导出值改变不会导致导入值改变的现象。 esmodule中的导入值更像一个指针，导入导出值都指向同一个同一个内存地址，所以导入值会随导出值变化而变化。
-
 - CMS是运行时加载（动态加载），ESM则是静态编译期间就确定模块的依赖
 - ESM在编译期间会将所有import提升到顶部，commonjs不会提升require
 - CommonJs 是单个值导出，ES6 Module可以导出多个
+
+#### module.exports 和 exports的区别
+
+exports是 module.exports的引用，如果在导出时，直接exports = xxx，最后require识别的是module.exports = {},require只识别 module.exports
 
 #### node 模块加载
 
@@ -124,3 +126,13 @@ node适合I/O高并发密集型的任务
 - 先执行同步代码，将不同的任务添加至相应的队列，同步代码执行后清空微任务
 - 微任务清空后会去timer队列中执行满足条件的宏任务，执行完一个宏任务就会去清空微任务再执行下一个宏任务，执行完所有宏任务后依次切换队列（旧版本在每次切换队列之前才会清空微任务）
 - node下特有的微任务：process.nextTick(优先级高于promise)
+
+#### npm install的机制
+
+- 查看项目node_modules 目录之中是否已经存在指定模块
+- 若存在不重新安装
+  - 如果想强制安装，可以带参数 -f or --force
+  - 如果想更新安装的模块，则可以 npm update
+- 若不存在，npm 向 registry 查询模块压缩包的网址
+- 下载压缩包，存放在`~/.npm`目录
+- 解压压缩包到当前项目的`node_modules`目录

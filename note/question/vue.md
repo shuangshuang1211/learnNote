@@ -1,3 +1,5 @@
+## TODO ：Vue3源码学习，至少要知道Reactivety的思想
+
 #### React 与 Vue 的差异
 
 - 相同点：
@@ -19,7 +21,18 @@
 
 React更关注于底层的实现，上层应用解决方案基本不插手，Vue定位于快速解决问题，所以很多应用解决方案都是官方主导开发维护
 
+#### Vue 运行时编译时的概念
 
+- 什么时候运行时，尽量写成编译时
+- 模版编译的优化（比jsx、tsx有优势）
+
+effect activeEffect track
+
+#### Reactivety
+
+- activeEffect
+- track的过程
+- 
 
 ### patchVnode
 
@@ -281,3 +294,9 @@ React更关注于底层的实现，上层应用解决方案基本不插手，Vue
   npx husky add .husky/commit-msg 'npx --no -- commitlint --edit "$1"'
   
   ```
+
+#### computed和watch的区别
+
+computed：可以缓存数据，只有**依赖型数据**发生**改变**，computed 才会重新计算
+
+watch： 不缓存，主要用来监听某些特定数据的变化，从而进行某些具体的业务逻辑操作，监听的数据改变，直接会触发相应的操作，可以看作是 computed 和 methods 的结合体
