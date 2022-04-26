@@ -253,12 +253,15 @@ function commitRoot() {
 
 - 处理I/O密集型场景，用三元运算也可以实现，主要是会出现说waterfall的问题
   - **Suspense是要解决那些本可以并发的异步操作（包含Promise的组件），变成序列化串行（waterfall）的问题，也就是上面提到的I/O密集型问题，而不单单是组件的显示内容问题**
-
+- 处理race conditions
+- start fetching early
 - 是一种在等待组件渲染前进行其他操作的同时渲染预先准备的内容的机制
 - Suspense的child必须是一个promise，需要promise的状态来触发suspense
 - 一般使用结合lazyload
 - 自己实现的话要对子组件实现专门的wrapped处理，保证不会重复加载数据等
 - 怎么实现suspense？要抛出一个错误的promise
+
+[[参考](https://17.reactjs.org/docs/concurrent-mode-suspense.html#traditional-approaches-vs-suspense)]
 
 #### React setState同步异步？
 
@@ -529,7 +532,7 @@ function withSubscription(WrappedComponent, selectData) {
 - 页面真正的消耗在于DOM的操作，而diff等js计算相比起来极其便宜
 - VD优化了只有微小变动的时候，页面更新保证了性能，减少了不必要的DOM操作
 
-#### Hook的实现原理
+#### Hook的实现原理？(看源码定位到 renderWithHooks)
 
 - hook用闭包来保存状态，使用链表来保存一系列的hooks，把第一个hook与fiber关联，fiber树更新的时候就可以计算出最终的输出状态和相关的副作用
 - 不能在if中使用，只能在函数中使用
@@ -537,7 +540,70 @@ function withSubscription(WrappedComponent, selectData) {
 
 #### 虚拟列表实现
 
-- 原理：在vListContainer中渲染了一个真实list高度的“幻影”容器从而允许用户进行滚动操作。其次我们监听了onScroll事件，并且在每次用户触发滚动是动态计算当前滚动Offset（被滚上去隐藏了多少）所对应的开始下标（index）是多少。当我们发现新的下边和我们当前展示的下标不同时进行赋值并且setState触发重绘。当用户当前的滚动offset未触发下标更新时，则因为本身phantom的长度关系让虚拟列表拥有和普通列表一样的滚动能力。当触发重绘时因为我们计算的是startIndex 所以用户感知不到页面的重绘（因为当前滚动的下一帧和我们重绘完的内容是一致的）
+- 分为等高和不等高两种条件
+
+- conatiner的高度(可视区域容器高度containerHeight： showNumber *size)、scroll div用来展示scroll(高度：items.length * size)
+
+- conatiner内要包含一个list的容器(list-div),list-div需要设置top样式值，这个值需要由定位到的元素个数计算
+
+  滚动中，实时修改 list 的 top ，用于填补滚动条的空白
+
+  ```js
+  top () {
+        if (this.variable) {
+          return (this.positions[this.start - this.prev] ? this.positions[this.start - this.prev].top : 0) + 'px'
+        } else {
+          // 当设置了预加载的结构时，top 需要响应的减去这部分尺寸
+          return (this.start - this.prev) * this.size + 'px'
+        }
+      }
+  ```
+
+  
+
+- container需要绑定onSroll事件，在这个事件里，通过scrollTop确定展示的item的startIndex(**getStartIndex**)和endIndex(starIndex + showNumber)
+
+- **getStartIndex**:
+
+  - 等高Item：Math.floor(scrollTop / size)
+
+  - 可变高度Item（核心）：通过中位数的方式不停找middleIndex，并通过在position中取到该index的bottom，通过bottom与scrollTop对比来取
+
+    ```js
+    getStartIndex (scrollTop) {
+          // scrollTop 代表当前滚动的位置
+          // 在整体的范围中查找当前元素的位置
+          let start = 0
+          let end = this.positions.length - 1
+          let index = null // 缓存找到的位置值
+          while (start <= end) {
+            // 获取中位数
+            let middleIndex = parseInt((start + end) / 2)
+            let middleValue = this.positions[middleIndex].bottom
+    
+            // 比较这一个中位数跟当前滚动位置的关系
+            if (middleValue === scrollTop) {
+              return middleIndex + 1
+            } else if (middleValue > scrollTop) {
+              end = middleIndex - 1
+            } else if (middleValue < scrollTop) {
+              start = middleIndex + 1
+            }
+            // 每一轮计算出一个中位数后，都进行记录
+            index = middleIndex
+          }
+          return index
+        }
+    ```
+
+    
+
+- showItems，实际真正需要渲染数据，有前后prev条数据的缓冲items.slice(startindex -pprev, end + prev)
+
+- 不等高的一些特殊处理：
+
+  - 组件初始渲染时，对传入的items按照等高的渲染，用一个数组保存每个item id对应的height bottom top等信息，并在每个item-div上挂载ref
+  - 随后通过ref取到每个节点node对每个节点遍历，取到节点的getBoundingClientRect的height，对比positon中新旧height差值，有差值则更新height bottom以及之后的每个item的position值，后一个top = 前一个bottom
 
 [[参考](https://slbyml.github.io/QA/virtaul.html#_2-%E5%AF%B9-react-%E7%9A%84-virtual-dom-%E7%9A%84%E8%AF%AF%E8%A7%A3%E3%80%82)]
 

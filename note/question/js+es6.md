@@ -603,7 +603,7 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
   - Object.assign会触发target的setter，可能会出现一些副作用
   
 - 深拷贝：针对 Object,Array 这种复杂数据类型，深复制递归复制了所有的层级，新数据和原始数据不存在联系，因此在修改复制后的变量里引用类型的里面的值时，不会导致原始数据也被修改
-  - JSON.parse(JSON.stringify())： 无法正确处理undefined、function、symbol、set、map等类型的值
+  - JSON.parse(JSON.stringify())： 无法正确处理undefined、function、symbol、set、map等类型的值，循环引用也不行
   
   - 迭代递归，分别处理不同类型对应的值, [参考](https://github.com/ConardLi/ConardLi.github.io/blob/master/demo/deepClone/src/clone_6.js)
   
@@ -914,6 +914,7 @@ console.log('admin.name: ', admin.name);
 ### axios封装的问题
 
 - 请求头处理，错误处理，数据适配（拦截器对response处理），再加上性能监控
+- 发出去的请求怎么中断
 
 ### super关键字
 
@@ -1011,6 +1012,8 @@ console.log('admin.name: ', admin.name);
 ### 单点登录，如何实现
 
 - 
+
+### ServerLess
 
 1. 排序算法(至少三种)*
 
@@ -1229,17 +1232,38 @@ console.log('admin.name: ', admin.name);
 
 18. 0329
 
-    - 上午
-      - 一个页面，怎么做首屏渲染优化，怎么做首页图片加载优化等？
-      - hooks的缺点
+      - 上午
+        - 一个页面，怎么做首屏渲染优化，怎么做首页图片加载优化等？
+        
+          - 减少首屏渲染的体积大小
+        
+          - 减少首屏渲染从开始到可交互的时间
+        
+            以上两点可以从代码级别的优化：代码分片、懒加载、CDN等，nginx服务器配置
+        
+          - 从开始到可交互的时间，dom已经加载了，在这里可以进行一些UI上的渲染，让用户感知到页面的变化
+        
+        - hooks的缺点
+        
+      - 下午
 
-    - 下午
+        - useEffect中返回的函数执行时机？
 
-      - useEffect中返回的函数执行时机？
+        - promise原理，说说promise
 
-      - promise原理，说说promise
+        - 泛型使用在什么地方
+        - 父组件怎么取到子组件的函数？ref怎么取？
+        - async await的原理
 
-      - 泛型使用在什么地方
-      - 父组件怎么取到子组件的函数？ref怎么取？
-      - async await的原理
+19. 0330
+
+    - 哪些检查数据类型的方法(Object.prototype.toString)
+    - 数组的方法哪些是改变原数组哪些是不改变的
+    - object.keys 和 getOwnPropertyNames的区别
+      - Object.getOwnPropertyNames()自身属性的名称和可枚举的属性
+      - for ... in Object.keys() 只能迭代可枚举的
+    - 项目优化点怎么定位，怎么优化
+    - webpack常见的plugin loader
+    - axios的封装处理，如果请求发出去后怎么中断
+    - css选择器的优先级组合选择器
 
