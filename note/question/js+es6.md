@@ -277,7 +277,11 @@ JavaScript 如何实现这些特点，比如封装、继承、多态。如果关
 
 - const: 基本与let一致，但不能给变量重新赋值，且声明变量的同时也要进行变量初始化；
 
+### js类型检查
 
+- typeof
+- instanceof
+- Object.prototype.toString.call(targetValue)
 
 ### this的指向问题
 
